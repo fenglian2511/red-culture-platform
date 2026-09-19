@@ -1,0 +1,25 @@
+{
+  "name": "广西红色文化积极心理资源检索工具",
+  "short_name": "桂医红色文化",
+  "description": "桂林医科大学心理健康教育与咨询中心 - 广西红色文化积极心理资源检索工具",
+  "start_url": "./广西红色文化.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#8B0000",
+  "theme_color": "#8B0000",
+  "lang": "zh-CN",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
