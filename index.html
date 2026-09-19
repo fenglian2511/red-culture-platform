@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#8B0000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="桂医红色文化">
+<link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<title>广西红色文化积极心理资源检索工具</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{font-size:16px}
+body{margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","微软雅黑",sans-serif;background:#f5f5f5;color:#333;line-height:1.6;-webkit-font-smoothing:antialiased}
+a{text-decoration:none;color:inherit}
+/* Header */
+.site-header{background:linear-gradient(135deg,#8B0000 0%,#C0392B 100%);color:white;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,0.15);position:sticky;top:0;z-index:100}
+.header-inner{max-width:1200px;margin:0 auto}
+.site-title{font-size:1.15rem;font-weight:700;margin:0;letter-spacing:.5px;display:flex;align-items:center;gap:10px}
+.site-logo{width:40px;height:40px;border-radius:50%;background:white;padding:2px;flex-shrink:0;box-shadow:0 2px 6px rgba(0,0,0,0.2)}
+.site-subtitle{font-size:.75rem;margin:4px 0 0;color:#FFD700;opacity:.95}
+/* Search */
+.search-bar{background:white;padding:12px 16px;border-bottom:1px solid #eee;position:sticky;top:68px;z-index:99}
+.search-input-wrap{max-width:1200px;margin:0 auto;display:flex;align-items:center;gap:8px;background:#f9f9f9;border:2px solid #e0e0e0;border-radius:24px;padding:2px 4px 2px 16px;transition:border-color .2s}
+.search-input-wrap:focus-within{border-color:#8B0000}
+.search-icon{font-size:1.1rem;flex-shrink:0}
+.search-input{flex:1;border:none;background:transparent;padding:10px 0;font-size:.95rem;outline:none;color:#333;min-width:0}
+.search-btn{background:#C0392B;color:white;border:none;padding:8px 20px;border-radius:20px;font-size:.9rem;font-weight:600;cursor:pointer;transition:background .2s;flex-shrink:0}
+.search-btn:hover{background:#A93226}
+/* Filter toggle */
+.filter-toggle-bar{display:block;background:white;padding:10px 16px;border-bottom:1px solid #eee}
+.filter-toggle-btn{width:100%;background:#fff8f8;border:1px solid #E8C5C5;color:#8B0000;padding:10px 14px;border-radius:8px;font-size:.9rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:space-between}
+.filter-count{background:#C0392B;color:white;font-size:.75rem;padding:2px 8px;border-radius:10px;margin-left:8px}
+/* Layout */
+.main-layout{max-width:1200px;margin:0 auto;padding:12px;display:block}
+/* Filter panel */
+.filter-panel{background:white;border-radius:12px;padding:16px;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,0.06);display:none}
+.filter-panel.show{display:block}
+.filter-section{margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid #f0f0f0}
+.filter-section:last-of-type{border-bottom:none}
+.filter-title{font-size:1rem;font-weight:700;color:#8B0000;margin:0 0 12px;padding-bottom:8px;border-bottom:2px solid #FFE4E1}
+/* City grid */
+.city-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.city-chip{display:block;text-align:center;padding:10px 8px;background:#f9f9f9;border:1.5px solid #e0e0e0;border-radius:8px;font-size:.85rem;color:#555;font-weight:500;transition:all .2s;cursor:pointer}
+.city-chip:hover{border-color:#C0392B;color:#8B0000}
+.city-chip.active{background:#C0392B;color:white;border-color:#C0392B}
+.city-chip.guilin{background:#FFF5F5;border-color:#FFB3B3;color:#8B0000;font-weight:700}
+.city-chip.guilin.active{background:#8B0000;color:white}
+/* Type grid */
+.type-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.type-chip{display:block;text-align:center;padding:10px 6px;background:#f9f9f9;border:1.5px solid #e0e0e0;border-radius:8px;font-size:.8rem;color:#555;font-weight:500;transition:all .2s;cursor:pointer}
+.type-chip:hover{border-color:#C0392B;color:#8B0000}
+.type-chip.active{background:#C0392B;color:white;border-color:#C0392B}
+/* Card type tag */
+.card-type-tag{background:#E8F5E9;color:#2E7D32;font-size:.7rem;padding:2px 8px;border-radius:4px}
+.tag-type{background:#E8F5E9;color:#2E7D32;font-size:.75rem;padding:3px 10px;border-radius:10px}
+/* Category list */
+.category-list{display:flex;flex-direction:column;gap:6px}
+.category-item{display:flex;align-items:center;gap:10px;padding:8px 12px;background:#f9f9f9;border-radius:8px;cursor:pointer;transition:background .2s;font-size:.85rem}
+.category-item:hover{background:#FFF0F0}
+.category-item input{width:16px;height:16px;accent-color:#C0392B;cursor:pointer;flex-shrink:0}
+.category-item:has(input:checked){background:#FFE4E1;color:#8B0000;font-weight:600}
+/* Quality grid */
+.quality-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
+.quality-item{display:flex;align-items:center;gap:8px;padding:6px 10px;background:#f9f9f9;border-radius:6px;font-size:.8rem;cursor:pointer;transition:background .2s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.quality-item:hover{background:#FFF0F0}
+.quality-item input{width:14px;height:14px;accent-color:#C0392B;flex-shrink:0}
+.quality-item:has(input:checked){background:#FFE4E1;color:#8B0000;font-weight:600}
+/* Reset */
+.reset-btn{width:100%;padding:12px;background:#C0392B;color:white;border:none;border-radius:8px;font-size:.95rem;font-weight:600;cursor:pointer;transition:background .2s}
+.reset-btn:hover{background:#A93226}
+/* Results */
+.results-area{min-height:300px}
+.results-header{display:flex;align-items:center;flex-wrap:wrap;gap:8px;padding:4px 0 12px}
+.results-count{font-size:.95rem;color:#555}
+.results-count strong{color:#8B0000;font-size:1.2rem}
+.filter-tag{background:#FFE4E1;color:#8B0000;padding:4px 10px;border-radius:12px;font-size:.8rem}
+/* Cards */
+.result-cards{display:flex;flex-direction:column;gap:12px}
+.result-card{background:white;border-radius:12px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,0.06);transition:transform .2s,box-shadow .2s;display:block;border:1px solid #eee;position:relative;overflow:hidden;cursor:pointer}
+.result-card.key-resource{border-color:#8B0000;border-width:2px;background:linear-gradient(135deg,#fff 0%,#fff8f8 100%)}
+.result-card:active{transform:scale(.98)}
+.card-header{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.card-city{font-size:.85rem;font-weight:600;color:#C0392B}
+.card-key-tag{background:#FFD700;color:#8B0000;font-size:.7rem;font-weight:700;padding:2px 6px;border-radius:4px}
+.card-cat-tag{background:#FFF3E0;color:#E65100;font-size:.7rem;padding:2px 8px;border-radius:4px}
+.card-title{font-size:1.15rem;font-weight:700;color:#333;margin:0 0 4px}
+.card-event{font-size:.8rem;color:#888;margin:0 0 10px}
+.card-qualities{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.quality-tag{background:#E74C3C;color:white;font-size:.75rem;padding:3px 8px;border-radius:10px}
+.quality-tag.more{background:#999}
+.card-desc{font-size:.85rem;color:#666;margin:0 0 10px;line-height:1.5}
+.card-action{display:inline-block;color:#C0392B;font-weight:600;font-size:.9rem}
+/* No results */
+.no-results{text-align:center;padding:60px 20px;background:white;border-radius:12px}
+.no-results-icon{font-size:3rem;margin-bottom:12px}
+.no-results h3{color:#555;margin:0 0 8px}
+.no-results p{color:#999;font-size:.9rem;margin:0}
+/* Detail */
+.detail-nav{max-width:800px;margin:0 auto;padding:12px 16px 0;display:flex;align-items:center;gap:12px}
+.back-btn{display:inline-block;background:#C0392B;color:white;padding:8px 18px;border-radius:20px;font-size:.9rem;font-weight:600;cursor:pointer;border:none}
+.breadcrumb{font-size:.8rem;color:#888}
+.breadcrumb .sep{margin:0 4px;color:#ccc}
+.detail-header{max-width:800px;margin:12px auto 0;background:linear-gradient(135deg,#8B0000 0%,#C0392B 100%);color:white;padding:24px 20px;border-radius:12px}
+.detail-header.key-header{background:linear-gradient(135deg,#8B0000 0%,#B22222 50%,#C0392B 100%)}
+.detail-tags{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.tag-city{background:rgba(255,255,255,0.2);padding:4px 10px;border-radius:12px;font-size:.85rem}
+.tag-key{background:#FFD700;color:#8B0000;font-weight:700;padding:4px 10px;border-radius:12px;font-size:.8rem}
+.tag-cat{background:#FFE4E1;color:#8B0000;padding:4px 10px;border-radius:12px;font-size:.8rem}
+.detail-title{font-size:1.5rem;font-weight:700;margin:0 0 8px;line-height:1.3}
+.detail-event{font-size:.95rem;margin:0;opacity:.85}
+.detail-body{max-width:800px;margin:0 auto;padding:16px;display:flex;flex-direction:column;gap:14px}
+.detail-card{background:white;border-radius:12px;padding:18px 16px;box-shadow:0 2px 8px rgba(0,0,0,0.06)}
+.interp-section{margin-bottom:14px}
+.interp-section:last-child{margin-bottom:0}
+.interp-label{font-size:.8rem;font-weight:700;color:#8B0000;margin:0 0 4px;padding:2px 10px;background:#FFF3E0;border-radius:4px;display:inline-block}
+.card-h{font-size:1.05rem;font-weight:700;color:#8B0000;margin:0 0 12px}
+.card-line{height:2px;background:#FFE4E1;margin-bottom:12px;border-radius:1px}
+.card-line.gold{background:#FFD700}
+.card-text{font-size:.95rem;color:#555;line-height:1.8;margin:0}
+.gold-card{border:2px solid #FFD700;background:linear-gradient(135deg,#fff 0%,#FFFEF5 100%)}
+.qual-cloud{display:flex;flex-wrap:wrap;gap:8px}
+.qual-badge{background:#E74C3C;color:white;padding:6px 14px;border-radius:16px;font-size:.85rem;font-weight:600;transition:background .2s}
+.qual-badge:hover{background:#922B21}
+.related-list{display:flex;flex-direction:column;gap:8px}
+.related-item{display:flex;align-items:center;gap:10px;padding:12px;background:#f9f9f9;border-radius:8px;transition:background .2s;cursor:pointer}
+.related-item:hover{background:#FFF0F0}
+.related-site{font-size:.95rem;font-weight:600;color:#333;flex-shrink:0}
+.related-meta{font-size:.75rem;color:#888;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.related-arrow{color:#C0392B;font-weight:700;flex-shrink:0}
+.detail-actions{display:flex;flex-direction:column;gap:10px;margin-top:8px}
+.action-btn{display:block;text-align:center;padding:14px;border-radius:10px;font-size:.95rem;font-weight:600;transition:all .2s;cursor:pointer;border:none}
+.action-btn.primary{background:#C0392B;color:white}
+.action-btn.primary:hover{background:#A93226}
+.action-btn.secondary{background:white;color:#C0392B;border:2px solid #C0392B}
+.action-btn.secondary:hover{background:#FFE4E1}
+/* Footer */
+.site-footer{text-align:center;padding:20px 16px;color:#999;font-size:.8rem;border-top:1px solid #eee;margin-top:20px}
+.site-footer p{margin:0}
+/* Responsive */
+@media(min-width:600px){
+.site-title{font-size:1.35rem}
+.site-subtitle{font-size:.85rem}
+.city-grid{grid-template-columns:repeat(3,1fr)}
+.quality-grid{grid-template-columns:repeat(3,1fr)}
+.search-btn{padding:10px 28px}
+.result-card{padding:20px}
+.card-title{font-size:1.25rem}
+.detail-actions{flex-direction:row}
+.action-btn{flex:1}
+}
+@media(min-width:900px){
+.site-header{padding:20px 24px}
+.search-bar{padding:16px 24px}
+.main-layout{display:grid;grid-template-columns:280px 1fr;gap:20px;padding:20px;max-width:1200px}
+.filter-toggle-bar{display:none}
+.filter-panel{display:block;margin-bottom:0;position:sticky;top:140px;max-height:calc(100vh - 160px);overflow-y:auto}
+.city-grid{grid-template-columns:repeat(2,1fr)}
+.quality-grid{grid-template-columns:repeat(2,1fr)}
+.result-cards{display:grid;grid-template-columns:repeat(2,1fr)}
+.site-footer{padding:30px 24px}
+.detail-nav{padding:16px 24px 0}
+.detail-header{padding:32px 28px}
+.detail-title{font-size:2rem}
+.detail-body{padding:20px 24px}
+.detail-card{padding:24px 24px}
+}
+@media(min-width:1200px){.result-cards{grid-template-columns:repeat(3,1fr)}}
+/* Views */
+.view{display:none}
+.view.active{display:block}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <h1 class="site-title"><img src='data:image/jpeg;base64,/9j/4QAYRXhpZgAASUkqAAgAAAAAAAAAAAAAAP/sABFEdWNreQABAAQAAABkAAD/4QMZaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wLwA8P3hwYWNrZXQgYmVnaW49Iu+7vyIgaWQ9Ilc1TTBNcENlaGlIenJlU3pOVGN6a2M5ZCI/PiA8eDp4bXBtZXRhIHhtbG5zOng9ImFkb2JlOm5zOm1ldGEvIiB4OnhtcHRrPSJBZG9iZSBYTVAgQ29yZSA1LjMtYzAxMSA2Ni4xNDU2NjEsIDIwMTIvMDIvMDYtMTQ6NTY6MjcgICAgICAgICI+IDxyZGY6UkRGIHhtbG5zOnJkZj0iaHR0cDovL3d3dy53My5vcmcvMTk5OS8wMi8yMi1yZGYtc3ludGF4LW5zIyI+IDxyZGY6RGVzY3JpcHRpb24gcmRmOmFib3V0PSIiIHhtbG5zOnhtcE1NPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvbW0vIiB4bWxuczpzdFJlZj0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL3NUeXBlL1Jlc291cmNlUmVmIyIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bXBNTTpEb2N1bWVudElEPSJ4bXAuZGlkOkE4OEY4MDk0QzI1NjExRTk5QzEzRDY0RDUzOEM1Qzg0IiB4bXBNTTpJbnN0YW5jZUlEPSJ4bXAuaWlkOkE4OEY4MDkzQzI1NjExRTk5QzEzRDY0RDUzOEM1Qzg0IiB4bXA6Q3JlYXRvclRvb2w9IkFkb2JlIFBob3Rvc2hvcCBDUzYgV2luZG93cyI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSI4NDk0MTU2MDc5NjAyMjVDNDM5MjNCNTk1Njc1NDc5QyIgc3RSZWY6ZG9jdW1lbnRJRD0iODQ5NDE1NjA3OTYwMjI1QzQzOTIzQjU5NTY3NTQ3OUMiLz4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz7/7gAmQWRvYmUAZMAAAAABAwAVBAMGCg0AAA3bAAAmoQAAM5QAAELH/9sAhAABAQEBAQEBAQEBAQEB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' class='site-logo' alt='桂林医科大学校徽'> 广西红色文化心理资源</h1>
+    <p class="site-subtitle">桂林医科大学心理健康教育与咨询中心</p>
+  </div>
+</header>
+
+<!-- List View -->
+<div class="view active" id="listView">
+  <div class="search-bar">
+    <div class="search-input-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchInput" class="search-input" placeholder="搜索城市、遗址、品质...">
+      <button class="search-btn" onclick="doSearch()">搜索</button>
+    </div>
+  </div>
+
+  <div class="filter-toggle-bar">
+    <button class="filter-toggle-btn" id="filterToggle" onclick="toggleFilter()">
+      <span>☰ 筛选条件</span>
+      <span class="filter-count" id="filterCount">0</span>
+    </button>
+  </div>
+
+  <div class="main-layout">
+    <aside class="filter-panel" id="filterPanel">
+      <div class="filter-section">
+        <h3 class="filter-title">📋 类型筛选</h3>
+        <div class="type-grid" id="typeGrid"></div>
+      </div>
+      <div class="filter-section">
+        <h3 class="filter-title">🏙️ 城市筛选</h3>
+        <div class="city-grid" id="cityGrid"></div>
+      </div>
+      <div class="filter-section">
+        <h3 class="filter-title">🧠 品质分类</h3>
+        <div class="category-list" id="categoryList"></div>
+      </div>
+      <div class="filter-section">
+        <h3 class="filter-title">🔑 品质关键词</h3>
+        <div class="quality-grid" id="qualityGrid"></div>
+      </div>
+      <button class="reset-btn" onclick="resetFilters()">🔄 重置所有筛选</button>
+    </aside>
+
+    <main class="results-area">
+      <div class="results-header">
+        <span class="results-count">共找到 <strong id="resultCount">0</strong> 条资源</span>
+        <span id="filterTags"></span>
+      </div>
+      <div class="result-cards" id="resultCards"></div>
+    </main>
+  </div>
+</div>
+
+<!-- Detail View -->
+<div class="view" id="detailView">
+  <div class="detail-nav">
+    <button class="back-btn" onclick="showList()">← 返回列表</button>
+    <div class="breadcrumb" id="breadcrumb"></div>
+  </div>
+  <div class="detail-header" id="detailHeader">
+    <div class="detail-tags" id="detailTags"></div>
+    <h1 class="detail-title" id="detailTitle"></h1>
+    <p class="detail-event" id="detailEvent"></p>
+  </div>
+  <div class="detail-body">
+    <section class="detail-card">
+      <h2 class="card-h">📖 红色资源解读</h2>
+      <div class="card-line"></div>
+      <div class="interp-section">
+        <p class="interp-label">史实简述</p>
+        <p class="card-text" id="detailInterp"></p>
+      </div>
+      <div class="interp-section">
+        <p class="interp-label">品质映射</p>
+        <p class="card-text" id="detailQualText"></p>
+      </div>
+      <div class="interp-section">
+        <p class="interp-label">现实启示</p>
+        <p class="card-text" id="detailInspire"></p>
+      </div>
+    </section>
+    <section class="detail-card">
+      <h2 class="card-h">💡 核心积极心理品质</h2>
+      <div class="card-line"></div>
+      <div class="qual-cloud" id="detailQualities"></div>
+    </section>
+    <section class="detail-card gold-card">
+      <h2 class="card-h">🎓 课题应用价值</h2>
+      <div class="card-line gold"></div>
+      <p class="card-text" id="detailValue"></p>
+    </section>
+    <section class="detail-card" id="relatedSection" style="display:none">
+      <h2 class="card-h">🔗 同城其他红色资源</h2>
+      <div class="card-line"></div>
+      <div class="related-list" id="relatedList"></div>
+    </section>
+    <div class="detail-actions">
+      <button class="action-btn primary" onclick="showList()">← 返回列表</button>
+      <button class="action-btn secondary" id="filterByCategory" onclick="filterByCategory()">查看全部同类资源</button>
+    </div>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <p>广西红色文化积极心理资源库 v1.0 | 共 <span id="totalCount">132</span> 条资源</p>
+</footer>
+
+<script>
+// ============ 数据 ============
+const DATABASE=[
+{city:"桂林市",site:"全州脚山铺阻击战",event:"湘江战役核心遗址",qualities:["勇敢无畏","直面绝境","不惧牺牲","迎难而上","抗压坚韧","集体同心","绝不退缩"],interpretation:"1934年11月，湘江战役中红军在全州脚山铺与国民党军展开惨烈阻击战，兵力悬殊、装备落后的红军将士血战阵地，以巨大牺牲掩护中央纵队渡江突围，是长征史上最壮烈的一战。",inspire:"面对考研、四六级等学业攻坚的绝境，汲取红军以弱抗强、死守阵地的勇气，在劣势中坚定信念，以集体协作突破极限。",category:"勇敢抗争、无畏担当类",is_key:true},
+{city:"桂林市",site:"灌阳新圩酒海井",event:"湘江战役核心遗址",qualities:["勇敢无畏","坚守阵地","不惧强敌","团结抗敌"],interpretation:"1934年11月，湘江战役中红军在灌阳新圩以少敌多阻击敌军，伤亡惨烈仍死守阵地，数千红军战士血染酒海井，为掩护主力渡江作出关键贡献。",inspire:"面对学科竞赛、求职面试等强弱悬殊的挑战，应学红军以少敌多、死守阵地的意志，稳住阵脚、团结同伴共同抵御困境。",category:"勇敢抗争、无畏担当类",is_key:true},
+{city:"桂林市",site:"兴安界首渡江",event:"湘江战役核心遗址",qualities:["勇往直前","不怕牺牲","团结协作","突破封锁"],interpretation:"1934年11月，红军主力在兴安界首渡口强渡湘江，面对敌机昼夜轰炸和炮火封锁，以血肉之躯开辟渡江通道，粉碎了蒋介石围歼红军于湘江的企图。",inspire:"面对升学就业的层层关卡，汲取红军强渡湘江、突破封锁的勇气，与同伴协作开辟前进通道，敢于拼搏、勇往直前。",category:"勇敢抗争、无畏担当类",is_key:true},
+{city:"桂林市",site:"老山界翻越遗址",event:"红军长征翻越老山界",qualities:["吃苦耐劳","意志顽强","不畏艰险","克服苦难","乐观坚持"],interpretation:"1934年12月，红军长征翻越老山界，深夜行军穿越陡峭高山，将士们饥寒交迫仍稳步前行，以坚韧意志完成了长征途中最艰难的一段行军。",inspire:"面对学业长途跋涉般的磨砺，汲取红军深夜翻越陡山的意志，在饥寒疲惫中保持乐观，以顽强毅力稳步攀登向前。",category:"直面困境、不怕困难类",is_key:true},
+{city:"桂林市",site:"龙胜红军楼",event:"龙胜各族自治县长征旧址",qualities:["真诚友善","团结互助","包容共情","携手共渡难关"],interpretation:"1934年12月，红军长征途经龙胜，在红军楼与各族群众结下深厚情谊，军民携手抗敌、共渡难关，体现了民族团结互助的宝贵品质。",inspire:"面对宿舍相处、班级人际中的隔阂与孤独，汲取红军与各族群众互助的真情，以真诚包容对待身边人，携手共渡学习生活难关。",category:"支撑辅助积极品质",is_key:true},
+{city:"桂林市",site:"瑶民长征旧址",event:"龙胜瑶民长征旧址",qualities:["团结互助","民族包容","坚定信念","共克时艰"],interpretation:"1934年12月，红军长征途经龙胜瑶族聚居区，瑶族群众主动为红军当向导、送物资，与红军并肩作战抗击敌军，体现了民族团结共克时艰的精神。",inspire:"面对宿舍相处、班级人际中的文化差异与隔阂，汲取瑶族同胞与红军并肩作战的精神，以包容心态团结同学，共克学业与生活的时艰。",category:"支撑辅助积极品质",is_key:true},
+{city:"桂林市",site:"八路军桂林办事处",event:"八路军桂林办事处旧址",qualities:["爱国勇敢","逆境坚守","直面压迫","挺身而出"],interpretation:"1938年至1945年，八路军桂林办事处在白色恐怖下坚持开展抗日救亡工作，联络各界爱国人士，输送青年奔赴抗日前线，是国统区抗日堡垒。",inspire:"面对校园或职场中的不公与压力，汲取办事处在白色恐怖下坚守的勇气，不随波逐流，在逆境中挺身而出、守住底线。",category:"直面困境、不怕困难类",is_key:true},
+{city:"桂林市",site:"桂林抗战文化城",event:"桂林抗战文化城遗址",qualities:["爱国勇敢","乐观自救","挺身而出","勇于抗争"],interpretation:"1938年至1944年，桂林成为全国抗战文化中心，田汉、欧阳予倩等各界人士齐聚，以笔为枪、以文为刃开展抗日救亡运动，展现了逆境中的精神力量。",inspire:"面对学业迷茫与社会焦虑，汲取文化城各界人士挺身而出的担当，以知识才情投身时代，在逆境中保持乐观自救。",category:"勇敢抗争、无畏担当类",is_key:true},
+{city:"百色市",site:"百色起义纪念馆",event:"百色起义旧址",qualities:["敢闯敢干","勇敢反抗","百折不挠","艰苦奋斗","不惧强权"],interpretation:"1929年12月11日，邓小平、张云逸、韦拔群等领导百色起义，打响广西武装反抗国民党反动派第一枪，创建红七军和右江革命根据地，是广西革命的里程碑。",inspire:"面对创新实践中的权威与阻力，汲取百色起义敢闯敢干的勇气，不惧失败与质疑，在艰苦探索中坚守自己的方向。",category:"勇敢抗争、无畏担当类",is_key:false},
+{city:"百色市",site:"粤东会馆",event:"红七军军部旧址",qualities:["坚定信念","艰苦奋斗","勇于开拓","不畏强敌"],interpretation:"1929年12月至1930年10月，粤东会馆是红七军军部所在地，见证了红七军在百色地区开展土地革命、巩固革命根据地的艰苦斗争岁月。",inspire:"面对学业或创业初期的艰苦，汲取红七军艰苦奋斗、勇于开拓的作风，在资源匮乏中坚定信念，一步一个脚印开拓前进。",category:"直面困境、不怕困难类",is_key:false},
+{city:"百色市",site:"红七军征战旧址",event:"红七军征战史迹",qualities:["百折不挠","愈挫愈勇","团结战斗","不怕牺牲"],interpretation:"1930年秋至1931年夏，红七军从右江根据地北上远征，转战千里、浴血奋战，突破国民党军多次围追堵截，最终与中央红军汇合，展现了百折不挠的革命精神。",inspire:"面对屡考屡败的挫折，汲取红七军转战千里、愈挫愈勇的韧性，把每一次失败当作磨砺，与同伴团结战斗不轻言放弃。",category:"直面困境、不怕困难类",is_key:false},
+{city:"百色市",site:"黄文秀驻村扶贫基地",event:"黄文秀同志生前扶贫点",qualities:["迎难而上","敢于担当","不怕基层艰苦","坚持奋斗","甘于奉献"],interpretation:"2018年至2019年，黄文秀同志扎根百色乐业驻村扶贫，遍访贫困户、引进致富项目，用年仅30岁的生命诠释了迎难而上、甘于奉献的新时代青年担当。",inspire:"面对就业选择中的基层与艰苦岗位，汲取黄文秀扎根奉献的担当，不贪图安逸，在平凡岗位上坚持奋斗、实现价值。",category:"支撑辅助积极品质",is_key:false},
+{city:"崇左市",site:"龙州起义旧址",event:"龙州起义纪念馆",qualities:["开拓勇敢","不畏强敌","攻坚克难","坚守理想"],interpretation:"1930年2月1日，俞作豫等领导龙州起义，创建中国红军第八军和左江革命根据地，在中越边境地区开展革命斗争，展现了开拓勇敢、坚守理想的精神。",inspire:"面对专业探索中的未知与强手，汲取龙州起义边境开拓的勇气，不畏艰难险阻，在理想指引下攻坚克难、稳步前行。",category:"勇敢抗争、无畏担当类",is_key:false},
+{city:"崇左市",site:"左江农民运动讲习所",event:"左江农民运动旧址",qualities:["敢于斗争","直面边境困难","坚定信念","开拓进取"],interpretation:"1930年，左江农民运动讲习所在龙州创办，为左江革命根据地培养了大批革命骨干，学员深入边境农村开展艰苦斗争，体现了敢于斗争的精神。",inspire:"面对学习环境的偏远与资源不足，汲取讲习所骨干坚守边境的信念，敢于在困境中斗争，以开拓进取补足自身短板。",category:"直面困境、不怕困难类",is_key:false},
+{city:"河池市",site:"韦拔群纪念馆",event:"韦拔群同志故居",qualities:["顽强不屈","愈挫愈勇","敢于斗争","吃苦奉献","屡败屡战"],interpretation:"1923年至1932年，韦拔群同志作为广西农民运动先驱，三次起兵三遭挫折仍坚守革命信念，在右江山区坚持游击斗争直至牺牲，展现了屡败屡战的顽强精神。",inspire:"面对反复失败想要放弃的时刻，汲取韦拔群三起三落仍坚守的韧性，把挫折视为磨砺，屡败屡战、吃苦奉献不退缩。",category:"直面困境、不怕困难类",is_key:false},
+{city:"河池市",site:"列宁岩农民讲习所",event:"东巴凤革命根据地",qualities:["坚定信念","开拓创新","吃苦奉献","敢于斗争"],interpretation:"1925年，韦拔群在东兰列宁岩创办广西最早的农民运动讲习所，为广西革命培养了大批骨干力量，学员深入各地发动农民，推动了广西革命形势的发展。",inspire:"面对学习方法陈旧、动力不足的困境，汲取讲习所开拓创新的精神，敢于突破旧习，在吃苦钻研中坚定求学信念。",category:"支撑辅助积极品质",is_key:false},
+{city:"河池市",site:"红七军整编旧址",event:"河池红军整编地点",qualities:["团结协作","坚定信念","不怕牺牲","艰苦奋斗"],interpretation:"1930年10月，红七军在河池整编后北上与中央红军汇合，整编中部队加强了团结协作和思想建设，展现了团结协作、坚定信念的革命精神。",inspire:"面对团队协作中的分歧与磨合，汲取红七军整编后团结北上的智慧，放下个人得失，以坚定信念凝聚集体向前。",category:"支撑辅助积极品质",is_key:false},
+{city:"梧州市",site:"中共广西特委旧址",event:"广西建党发源地",qualities:["勇敢求索","不惧白色恐怖","坚定初心","勇于探索"],interpretation:"1925年10月，中共广西特委在梧州成立，是广西最早的党组织，领导广西各地开展工农革命运动，体现了勇敢求索、坚定初心的精神。",inspire:"面对求学路上的未知与迷茫，汲取早期共产党人勇敢求索的初心，不惧质疑与孤独，在探索中坚定自己的方向。",category:"勇敢抗争、无畏担当类",is_key:false},
+{city:"梧州市",site:"早期革命活动点",event:"梧州革命旧址群",qualities:["坚定信仰","直面困难","勇于斗争","坚守初心"],interpretation:"1920年代，梧州作为广西革命的发源地，早期共产党人在此开展艰苦的地下斗争，建立中共广西第一个党支部，展现了坚定信仰和勇于斗争的精神。",inspire:"面对学业低谷与外界诱惑，汲取梧州地下党人坚守信仰的定力，直面困难不逃避，在诱惑与压力中守住求学初心。",category:"直面困境、不怕困难类",is_key:false},
+{city:"玉林市",site:"李明瑞俞作豫纪念馆",event:"桂东南抗日武装起义",qualities:["挺身而出","勇敢救国","不畏敌人","逆境抗争"],interpretation:"1939年至1945年，李明瑞、俞作豫同志领导桂东南抗日武装起义，在敌后开展艰苦抗日斗争，创建了桂东南抗日根据地，展现了挺身而出、勇敢救国的精神。",inspire:"面对集体需要与个人安逸的冲突，汲取两位先烈挺身救国的担当，不畏流言与困难，在逆境中主动扛起应有责任。",category:"勇敢抗争、无畏担当类",is_key:false},
+{city:"玉林市",site:"抗日起义遗址",event:"桂东南抗日根据地",qualities:["不畏强暴","勇于抗争","团结抗日","坚定信念"],interpretation:"1944年至1945年，桂东南抗日根据地军民在敌后开展艰苦抗战，发动武装起义抗击日军侵略，展现了不畏强暴、勇于抗争的民族精神。",inspire:"面对校园霸凌或不公对待，汲取桂东南军民不畏强暴的勇气，团结同伴勇于抗争，以坚定信念守护正义与尊严。",category:"直面困境、不怕困难类",is_key:false},
+{city:"贺州市",site:"黄姚省工委旧址",event:"中共广西省工委旧址",qualities:["隐忍坚强","不惧漫长艰苦","信念坚定","直面潜伏磨难"],interpretation:"1942年至1945年，中共广西省工委在黄姚隐蔽斗争数年，在极其艰苦的环境下坚持领导广西革命工作，秘密发展党组织，体现了隐忍坚强、信念坚定的精神。",inspire:"面对长期枯燥的备考与潜伏式磨砺，汲取省工委数年隐蔽斗争的隐忍，在寂寞坚守中锤炼信念，不因漫长而动摇。",category:"直面困境、不怕困难类",is_key:false},
+{city:"贵港市",site:"省一大旧址",event:"中共广西省第一次代表大会",qualities:["勇敢觉醒","团结抗争","不怕流血牺牲","坚定信念"],interpretation:"1925年12月，中共广西省第一次代表大会在贵港召开，标志着广西共产党组织的正式建立，会议制定了广西革命斗争纲领，展现了勇敢觉醒、团结抗争的精神。",inspire:"面对思想上的迷茫与随波逐流，汲取省一大代表勇敢觉醒的担当，敢于独立思考，与志同道合者团结抗争守正道。",category:"勇敢抗争、无畏担当类",is_key:false},
+{city:"贵港市",site:"中秋起义纪念园",event:"中秋起义遗址",qualities:["勇敢起义","不惧强敌","团结战斗","坚定信念"],interpretation:"1927年中秋节，桂东南地区爆发重要武装起义，当地军民在中共广西特委领导下勇敢起义、创建革命武装，展现了不惧强敌的革命精神。",inspire:"面对学业中的强敌与挑战，汲取中秋起义军民不惧强敌的勇气，团结同学共同攻坚，以坚定信念突破自身瓶颈。",category:"勇敢抗争、无畏担当类",is_key:false},
+{city:"柳州市",site:"红军过苗山旧址",event:"融安、融水长征途经点",qualities:["克服山路险阻","民族互助","艰苦坚守","团结少数民族"],interpretation:"1934年12月，红军长征途经融安、融水苗族山区，苗族群众主动为红军当向导、送粮送药，军民携手克服险峻山路，展现了民族互助的精神。",inspire:"面对宿舍相处、跨文化交流中的差异与隔阂，汲取红军过苗山团结互助的智慧，尊重差异、真诚待人，在艰险中携手共进。",category:"支撑辅助积极品质",is_key:false},
+{city:"柳州市",site:"地下党活动旧址",event:"柳州地下党旧址",qualities:["隐蔽斗争","坚定信念","不畏艰险","勇于牺牲"],interpretation:"1927年至1949年，柳州地下党组织在白色恐怖下坚持长期斗争，秘密发展党员、传递情报，多次组织武装反抗国民党统治，展现了坚定信念、不畏艰险的精神。",inspire:"面对默默无闻的付出与不被理解，汲取地下党人隐蔽斗争的定力，在平凡岗位上坚定信念，不畏艰险默默奉献。",category:"直面困境、不怕困难类",is_key:false},
+{city:"南宁市",site:"学生军抗日旧址",event:"广西学生军抗日遗址",qualities:["青年勇敢报国","不惧战乱苦难","挺身而出","爱国担当"],interpretation:"1938年至1945年，广西学生军投身抗日救亡，奔赴敌后开展宣传、救护和武装斗争，在战火中淬炼成长，展现了青年勇敢报国的精神风貌。",inspire:"面对时代赋予青年的责任，汲取广西学生军挺身报国的热血，不惧成长中的风雨，以青春担当投身学习与社会。",category:"勇敢抗争、无畏担当类",is_key:false},
+{city:"钦州市",site:"小董起义旧址",event:"小董起义纪念馆",qualities:["敌后作战","不惧敌后艰苦","勇敢抗敌","坚定信念"],interpretation:"1945年春，钦州小董起义在敌后开展武装斗争，建立抗日游击根据地，在日军占领区坚持艰苦抗战，展现了不畏敌后艰苦、勇敢抗敌的革命精神。",inspire:"面对无人支援的孤军奋斗，汲取小董起义敌后作战的勇气，在缺乏资源与关注的处境中坚定信念、勇敢前行。",category:"勇敢抗争、无畏担当类",is_key:false},
+{city:"钦州市",site:"泗峡坳墓园",event:"抗日阵亡将士墓园",qualities:["英勇抗敌","不怕牺牲","坚守阵地","团结作战"],interpretation:"1939年12月，泗峡坳战斗中军民团结抗日阻击战，以简陋装备抗击日军进攻，重创日军，展现了英勇抗敌、不怕牺牲的民族气节。",inspire:"面对集体任务中的高压与牺牲，汲取泗峡坳将士英勇抗敌的气节，与同伴团结作战、坚守阵地，不因困难而退缩。",category:"勇敢抗争、无畏担当类",is_key:false},
+{city:"北海市",site:"滨海地下联络点",event:"北海地下党旧址",qualities:["隐蔽坚守","直面沿海斗争风险","坚定信念","勇于担当"],interpretation:"1930年代至1940年代，北海地下党组织在沿海地区坚持隐蔽斗争，建立秘密联络点传递情报，开展抗日救亡工作，展现了直面风险、坚定信念的精神。",inspire:"面对身处边缘岗位的孤独与风险，汲取北海地下党隐蔽坚守的定力，在不起眼的位置上勇于担当、坚定信念。",category:"直面困境、不怕困难类",is_key:false},
+{city:"防城港市",site:"边境交通站旧址",event:"防城港边境交通站",qualities:["不畏边境艰险","坚守革命任务","勇于担当","坚定信念"],interpretation:"1930年代至1940年代，防城港边境交通站在险恶环境中秘密传递情报、运送物资，保障中越边境革命联络线的畅通，展现了不畏艰险、坚守任务的精神。",inspire:"面对传递信息、协调沟通的琐碎任务，汲取边境交通站不畏艰险的坚守，把小事做实做稳，以担当信念保障全局。",category:"直面困境、不怕困难类",is_key:false},
+{city:"来宾市",site:"金秀瑶山游击旧址",event:"金秀瑶山游击队根据地",qualities:["深山艰苦作战","顽强克服生存困难","意志坚定","团结瑶胞"],interpretation:"1940年代，金秀瑶山游击队在深山密林中开展艰苦斗争，依靠瑶族群众支持坚持革命，发动各族群众反抗国民党统治，展现了顽强的生存意志。",inspire:"面对资源匮乏与生存压力，汲取瑶山游击队深山苦战的意志，依托身边力量顽强生存，在艰难处境中坚定前行。",category:"直面困境、不怕困难类",is_key:false},
+// ========== 新增：重大历史事件（30条）==========
+{type:"重大历史事件",city:"崇左市",site:"龙州起义",event:"关联人物：俞作豫、林景云",qualities:["勇敢","信念坚定","不畏挫折"],interpretation:"1930年2月1日，俞作豫、林景云等领导龙州武装起义，成立红八军和左江革命委员会，创建左江革命根据地。起义遭国民党军重兵围剿受挫后，红八军余部仍在中越边境坚持游击斗争，播撒革命火种。",inspire:"考研备考遭遇瓶颈时，学习龙州起义先辈在挫折中坚守的勇气，直面困难不退缩，在绝境中依然保持前行的信念。",is_key:false},
+{type:"重大历史事件",city:"百色市",site:"百色起义",event:"关联人物：韦拔群、李明瑞",qualities:["信念坚定","敢于斗争","开拓创新"],interpretation:"1929年12月11日，邓小平、张云逸、韦拔群等在百色发动武装起义，组建中国工农红军第七军，建立右江革命根据地，是广西革命武装斗争的重要里程碑，为后来革命奠定坚实基础。",inspire:"求职面试或学科竞赛面临未知领域时，学习百色起义先辈敢闯敢干的勇气，敢于走出舒适区，在陌生领域开辟属于自己的道路。",is_key:false},
+{type:"重大历史事件",city:"桂林市",site:"湘江战役",event:"关联人物：陈树湘",qualities:["坚毅无畏","忠诚担当","顾全大局"],interpretation:"1934年11月下旬至12月初，红军长征途经桂北全州、兴安、灌阳湘江一线，与国民党军展开惨烈血战，以巨大牺牲掩护中央纵队突围渡江，是中国革命生死攸关的历史转折点。",inspire:"考研冲刺或期末复习遭遇极限压力时，学习红军血战湘江的决绝勇气，敢于付出代价突破瓶颈，在绝境中守护最重要的目标不放弃。",is_key:true},
+{type:"重大历史事件",city:"桂林市",site:"桂林保卫战",event:"关联人物：守城爱国官兵",qualities:["勇敢不屈","视死如归","坚守使命"],interpretation:"1944年10月下旬至11月上旬，日军大举进犯桂林，守城爱国官兵与地方民团联手，以劣势兵力与简陋装备血战旬日，重创日军后桂林沦陷，展现视死如归的爱国气节。",inspire:"面对突如其来的危机或求职高压时，学习桂林守城将士的血性担当，不退缩不逃避，在岗位上竭尽全力守护属于自己的责任与荣誉。",is_key:true},
+{type:"重大历史事件",city:"钦州市",site:"灵山四峡坳抗日战斗",event:"关联人物：灵山抗日游击队",qualities:["团结互助","勇敢抗争","保家卫国"],interpretation:"1940年1月，灵山抗日游击队依托四峡坳险要地形阻击进犯日军，以少敌多坚持激战，重创日军兵力，鼓舞了桂南地区抗日军民的斗志，为桂南抗战作出重要贡献。",inspire:"学科竞赛或技能考试面临强敌时，学习灵山游击队因地制势的智慧，善用自身优势与资源，在劣势中寻找突破口坚定应战。",is_key:false},
+{type:"重大历史事件",city:"钦州市",site:"钦廉四属武装起义",event:"关联人物：阮明、招玉馨",qualities:["信念坚定","不畏强敌","果敢行动"],interpretation:"1945年春，阮明、招玉馨等在钦廉四属地区领导抗日武装起义，组建抗日游击队伍，开辟了钦廉游击根据地，为桂南地区抗日斗争和日后解放奠定了重要基础。",inspire:"在求职创业或学术研究缺乏先例可循时，学习钦廉起义先辈的果敢，敢于成为先行者，在摸索中凝聚同伴共同开创新局面。",is_key:false},
+{type:"重大历史事件",city:"贵港市",site:"桂中南游击战争",event:"关联人物：谭留科",qualities:["坚韧不拔","因地制宜","共情群众"],interpretation:"1946年至1949年，桂中南游击队在谭留科等领导下，依托大容山等山区地形长期开展敌后游击作战，牵制国民党大量兵力，配合南下大军解放广西，作出重要贡献。",inspire:"面对长期看不到成果的科研或备考坚持时，学习桂中南游击队持久作战的耐心，在默默耕耘中积蓄力量，相信时间会回报持续的努力。",is_key:false},
+{type:"重大历史事件",city:"南宁市",site:"横县抗日敌后斗争",event:"关联人物：黄立香",qualities:["自强不息","沉着应变"],interpretation:"1944年至1945年，横县地下党组织发动群众组建抗日游击队，深入敌后袭扰日军交通线与据点，破坏敌伪政权，保卫乡梓安宁，为桂南抗战胜利作出积极贡献。",inspire:"面对庞杂繁难的毕业设计或科研任务时，学习横县地下党发动群众的智慧，善于调动身边资源协作攻关，以小搏大突破困局。",is_key:false},
+{type:"重大历史事件",city:"百色市",site:"平马整训",event:"关联人物：邓小平、张云逸",qualities:["勤学善思","凝心聚力","理想坚定"],interpretation:"1930年7月，邓小平、张云逸在平马镇对红七军开展系统的思想政治与军事整训，加强部队政治教育和组织建设，巩固革命队伍战斗力，为红七军北上远征奠定了坚实基础。",inspire:"面对团队凝聚力不足或宿舍关系紧张时，学习平马整训的智慧，以真诚沟通和互相学习增进理解，让集体更加团结坚强。",is_key:false},
+{type:"重大历史事件",city:"崇左市",site:"左江红色根据地建设",event:"关联人物：俞作豫",qualities:["开拓创新","甘于奉献","团结各族群众"],interpretation:"1930年龙州起义后，左江革命根据地建立工农革命政权，开展土地革命和反帝反封建斗争，团结边境各族群众，扩大了党在中越边境地区的革命影响，具有重要战略意义。",inspire:"面对跨文化交流或宿舍相处中的差异与隔阂时，学习左江根据地团结各族群众的做法，尊重差异真诚合作，在多元中建立和谐人际关系。",is_key:false},
+{type:"重大历史事件",city:"百色市",site:"红七军北上远征",event:"关联人物：李明瑞、张云逸",qualities:["乐观豁达","吃苦耐劳","百折不挠"],interpretation:"1930年秋，红七军在李明瑞、张云逸率领下离开右江根据地，突破国民党军重重封锁，历时数月转战数千里奔赴中央苏区，损失惨重仍坚定不移，是红军长征前的重要远征。",inspire:"面对漫长而艰难的考研备考或求职征途中，学习红七军千里转战的韧劲，不怕途中的挫折与消耗，咬定目标坚持向前终达目标。",is_key:false},
+{type:"重大历史事件",city:"贺州市",site:"怀集武装起义",event:"关联人物：梁一柱",qualities:["不畏强权","勇敢反抗","信念执着"],interpretation:"1944年秋，梁一柱等在广西怀集发动农民武装起义，反抗国民党反动势力的压迫与剥削，虽遭国民党军警镇压失败，但点燃了桂东地区的革命火种，推动了当地革命发展。",inspire:"面对不公的处境或考研就业的歧视时，学习怀集起义先辈敢于反抗的勇气，敢于站出来维护正当权益，在逆境中播下改变的种子。",is_key:false},
+{type:"重大历史事件",city:"玉林市",site:"陆川抗日游击斗争",event:"关联人物：巫德椿",qualities:["沉着冷静","机动灵活","守望相助"],interpretation:"1944年至1945年，巫德椿等领导的陆川抗日游击队依托山区群众支持，长期开展敌后袭扰与自卫作战，牵制日军兵力，保卫了桂东南部分地区的安宁，为抗战胜利作出贡献。",inspire:"面对资源匮乏的学习或创业处境时，学习陆川游击队依靠群众的智慧，主动链接身边的支持力量，以协作互助弥补个人短板共同突破。",is_key:false},
+{type:"重大历史事件",city:"防城港市",site:"防城边境抗日斗争",event:"关联人物：防城抗日自卫队",qualities:["坚守国土","警惕果敢","不怕牺牲"],interpretation:"1939年至1945年，防城抗日自卫队坚守中越边境海防要地，抵御日军登陆进攻与间谍渗透，以简陋装备守护国土完整与边民安全，展现了守土有责的担当精神。",inspire:"面对边远岗位或被忽视的工作时，学习防城自卫队坚守国土的担当精神，在不起眼的位置上把责任做到极致，默默贡献自己的价值。",is_key:false},
+{type:"重大历史事件",city:"河池市",site:"都安农民武装运动",event:"关联人物：韦拔群",qualities:["敢于抗争","自强不息","团结群众"],interpretation:"1920年代末至1930年代，韦拔群等在都安发动壮、瑶等少数民族群众，开展反对地主豪绅与苛捐杂税的武装斗争，建立农民协会和自卫武装，动摇了地方反动统治基础。",inspire:"面对班级或宿舍中的不公现象时，学习都安农民运动团结群众的智慧，团结同伴共同发声，以集体力量推动问题的合理解决。",is_key:false},
+{type:"重大历史事件",city:"梧州市",site:"梧州地下党情报工作",event:"关联人物：罗文坤",qualities:["谨小慎微","沉着冷静","忠诚守信"],interpretation:"1927年至1937年白色恐怖时期，梧州地下党在罗文坤等领导下建立秘密情报网络，在国民党严密搜捕下秘密传递关键情报，保障了广西党组织的安全运转和革命斗争的持续。",inspire:"面对高压与风险并存的考试或工作环境时，学习梧州地下党情报人员的谨慎沉着，做事细致周密不疏漏，在压力下保持冷静准确的判断。",is_key:false},
+{type:"重大历史事件",city:"防城港市",site:"上思武装游击斗争",event:"关联人物：黄泽善",qualities:["坚韧隐忍","适应逆境","持之以恒"],interpretation:"1947年至1949年，黄泽善等领导上思游击队依托十万大山深山密林的险要地形，开展长期武装游击作战，历经围剿仍坚持不懈，直至配合南下大军解放广西。",inspire:"面对长期孤立的科研或备考处境时，学习上思游击队的隐忍坚韧，耐住寂寞与艰辛，相信坚持终会迎来转机和曙光。",is_key:false},
+{type:"重大历史事件",city:"桂林市",site:"荔浦敌后游击战",event:"关联人物：黄绍辉",qualities:["机智应变","信念坚定","甘于吃苦"],interpretation:"1944年至1945年，黄绍辉等在广西荔浦组织群众开展敌后破袭战，破坏日军交通线与据点，袭扰敌伪政权，有效牵制了日军兵力，为桂北抗战胜利作出重要贡献。",inspire:"面对学业或科研中的细节攻坚任务时，学习荔浦敌后游击的机智灵活，找准薄弱环节精准发力，以小行动牵动大局面实现突破。",is_key:true},
+{type:"重大历史事件",city:"玉林市",site:"博白武装起义",event:"关联人物：傅奕群",qualities:["果敢无畏","敢于担当","众志成城"],interpretation:"1945年春，傅奕群等在广西博白领导武装起义，发动群众开辟桂东南游击区域，建立抗日民主政权，扩大了革命影响，为桂东南地区抗日和解放斗争奠定了基础。",inspire:"面对需要开拓新领域的学术或创业挑战时，学习博白起义先辈的果敢担当，敢于打破常规率先行动，带动同伴共同开辟新天地。",is_key:false},
+{type:"重大历史事件",city:"百色市",site:"田阳农民运动",event:"关联人物：黄治峰",qualities:["开拓进取","共情底层","持之以恒"],interpretation:"1920年代末，黄治峰等在广西田阳宣传革命思想，组织壮族农民反抗地主豪绅的苛捐杂税与压迫，建立农民协会和自卫武装，为百色起义和右江革命根据地建设奠定了群众基础。",inspire:"面对社团或班级中的不合理规则时，学习田阳农民运动先辈的勇气，敢于发声善于动员，以集体行动推动问题的解决与改善。",is_key:false},
+{type:"重大历史事件",city:"崇左市",site:"龙州反帝斗争",event:"关联人物：红八军指战员",qualities:["勇敢抗争","家国情怀","不畏列强"],interpretation:"1930年龙州起义后，红八军在龙州开展反帝爱国斗争，没收帝国主义教堂财产，驱逐外国反动传教士，打击了帝国主义在华势力，扩大了党在边境的反帝爱国影响。",inspire:"面对外部文化霸权或不公正待遇时，学习龙州反帝斗争的勇气，敢于维护自身立场与尊严，在压力下坚定捍卫应有的权利与底线。",is_key:false},
+{type:"重大历史事件",city:"河池市",site:"宜州敌后游击",event:"关联人物：韦士霖",qualities:["吃苦耐劳","乐观顽强","依靠群众"],interpretation:"1944年至1949年，韦士霖等在广西宜州山区坚持游击斗争，依靠群众支持保存革命力量，牵制国民党兵力，配合南下解放大军作战，为桂西北解放作出重要贡献。",inspire:"面对长期看不到成果的学习或工作坚持时，学习宜州游击队的韧劲，依托身边力量稳扎稳打，在耐心忍耐中等待时机成熟。",is_key:false},
+{type:"重大历史事件",city:"贺州市",site:"贺县护乡抗日斗争",event:"关联人物：地方抗日自卫队",qualities:["保土安民","团结一心","临危不惧"],interpretation:"1944年冬，广西贺县地方抗日自卫队奋起抵御日寇进犯，以简陋装备守护家乡百姓，击退日军多次进攻，展现了保土安民的乡土担当和誓死保卫家园的决心。",inspire:"面对身边同学或集体需要守护的时刻，学习贺县自卫队保土安民的担当，不计个人得失挺身而出，守护集体的荣誉与利益。",is_key:false},
+{type:"重大历史事件",city:"南宁市",site:"宾阳地下革命活动",event:"关联人物：蒙善宇",qualities:["耐心坚持","沉着谨慎","信念不移"],interpretation:"1930年代至解放前夕，蒙善宇等在广西宾阳长期秘密发展党员、建立地下党组织，耐心积蓄革命力量，开展抗日救亡和反抗国民党统治的斗争，为解放接应做好了准备。",inspire:"面对成效缓慢的长期备考或工作时，学习宾阳地下党的耐心坚持，不急于求成，在长期积累中厚植自己的实力终获成功。",is_key:false},
+{type:"重大历史事件",city:"崇左市",site:"宁明边境革命活动",event:"关联人物：何子礽",qualities:["坚守边疆","机智果敢","民族团结"],interpretation:"1930年代至1940年代，何子礽等在广西宁明中越边境串联壮族、瑶族等各族群众传播革命理念，建立秘密联络点，推动边疆民族团结与觉醒，为边疆革命奠定了基础。",inspire:"面对宿舍跨文化沟通或班级人际隔阂时，学习宁明边境串联各族的智慧，尊重差异耐心沟通，在多元中凝聚共识建立真挚友谊。",is_key:false},
+{type:"重大历史事件",city:"梧州市",site:"藤县抗日自卫斗争",event:"关联人物：藤县抗日自卫队",qualities:["守望相助","勇敢坚毅","自强不息"],interpretation:"1944年至1945年，广西藤县抗日自卫队奋起抗击日军扫荡，以血肉之躯保护乡民，多次击退日军进攻，展现了守望相助的乡土担当和不屈不挠的民族精神。",inspire:"面对身边同学遭遇困难的时刻，学习藤县自卫队挺身而出的勇气，不计得失守护同伴，在危难中彰显人性的温度与担当。",is_key:false},
+{type:"重大历史事件",city:"桂林市",site:"平乐地下党建设",event:"关联人物：廖梦樵",qualities:["隐忍坚持","不畏艰险","开拓局面"],interpretation:"1927年四一二反革命政变后，廖梦樵等在广西平乐、桂东一带发展地下党组织，冒着白色恐怖的危险播撒革命火种，为桂东解放斗争积蓄了重要力量，作出奠基性贡献。",inspire:"面对无人关注的开创性工作或科研时，学习平乐地下党播撒火种的远见与勇气，甘做奠基者，在寂寞耕耘中相信种子终会发芽结果。",is_key:true},
+{type:"重大历史事件",city:"南宁市",site:"马山农民抗争运动",event:"关联人物：李曦晨",qualities:["敢于斗争","坚韧不拔","互助共生"],interpretation:"1930年代，李曦晨等在广西马山组织壮族等少数民族群众，反抗地主豪绅的压迫与国民党的苛捐杂税，建立农民武装和农民协会，推动了桂中地区革命的发展。",inspire:"面对班级或社团中的群体性不公时，学习马山农民运动团结抗争的智慧，团结同伴共同发声，以集体力量推动不公正现象的改变。",is_key:false},
+{type:"重大历史事件",city:"崇左市",site:"天等游击斗争",event:"关联人物：农有资",qualities:["逆境坚守","乐观顽强","因地制宜"],interpretation:"1947年至1949年，农有资等领导天等游击队依托广西大石山区险要地形，因地制宜开展长期游击作战，历经国民党军多次围剿仍坚持战斗，直至配合南下大军解放广西。",inspire:"面对学习或创业环境的局限与资源不足时，学习天等游击队因地制宜的智慧，善用身边现有条件，在限制中找到前行的路径突破困境。",is_key:false},
+{type:"重大历史事件",city:"广西南部",site:"广西解放战役南线作战",event:"关联人物：南下解放军、桂中南游击队",qualities:["协同作战","持之以恒","必胜信念"],interpretation:"1949年12月至1950年2月，南下解放军第四野战军与桂中南游击队合力作战，肃清南疆国民党反动武装，解放广西南部广大地区，标志着广西全境解放和新民主主义革命胜利。",inspire:"面对求职升学或人生关键战役时，学习南线作战协同攻坚的智慧，主动链接盟友整合资源，以合力突破最后的难关取得胜利。",is_key:false},
+// ========== 新增：红色人物（70条）==========
+{type:"红色人物",city:"崇左市",site:"俞作豫",event:"关联事件：龙州起义",qualities:["信念坚定","勇敢","乐观从容"],interpretation:"1930年领导龙州起义，任红八军军长。起义失败后转战右江坚持革命斗争，1930年8月因叛徒出卖在南宁被捕。面对国民党反动派威逼利诱始终坚贞不屈，临刑前写下绝笔诗，于1930年9月从容就义，年仅29岁。",inspire:"面对考研失利、就业迷茫时，学习俞作豫在绝境中坚守信仰的精神，不为利诱动摇，以坚定信念走出困境。",is_key:false},
+{type:"红色人物",city:"崇左市",site:"林景云",event:"关联事件：龙州起义",qualities:["忠诚","责任担当","坚毅"],interpretation:"1930年参加龙州起义，任红八军第二纵队指导员。起义受挫后奉命掩护主力突围，激战中亲自销毁机密文件防止落入敌手，最终身负重伤于1930年4月英勇牺牲，年仅32岁。",inspire:"面对团队项目失败需要有人担当时，学习林景云主动承担的勇气，把集体利益置于个人安危之上。",is_key:false},
+{type:"红色人物",city:"百色市",site:"李明瑞",event:"关联事件：百色起义、龙州起义",qualities:["乐观豁达","不畏挫折","信念坚定"],interpretation:"1929年12月领导百色起义，1930年2月领导龙州起义，任红七军、红八军总指挥。曾为国民党高级将领，毅然投身革命。指挥部队转战桂黔湘三省，历经多次失利仍坚守信念，1931年英勇牺牲。",inspire:"面对考研还是就业的重大抉择，汲取李明瑞弃旧图新的勇气，敢于推翻过往选择，坚定走向新道路。",is_key:false},
+{type:"红色人物",city:"百色市",site:"韦拔群",event:"关联事件：百色起义",qualities:["坚毅执着","自强不息","共情群众"],interpretation:"1926年开始领导右江农民运动，1929年参与发动百色起义，任红七军第三纵队司令。主力北上后留守右江山区坚持游击斗争，三次起兵三遭挫折仍坚守信念，1932年10月被敌人杀害，年仅38岁。",inspire:"面对竞赛反复失利想放弃时，汲取韦拔群三起三落的韧性，屡败屡战，把挫折视为磨砺不退缩。",is_key:false},
+{type:"红色人物",city:"梧州市",site:"邓拔奇",event:"关联事件：广西地下党组织建设",qualities:["沉着冷静","机智勇敢","信念坚定"],interpretation:"1926年加入中国共产党，广西地下党组织重要领导者。1927年白色恐怖后奔走桂东、桂南各地重建党组织，多次身处险境凭借机智脱险，1932年在广东被捕牺牲，年仅29岁。",inspire:"面对高风险的科研或创业环境，学习邓拔奇沉着应变的智慧，做事细致周密，在危机中冷静寻找出路。",is_key:false},
+{type:"红色人物",city:"梧州市",site:"罗文坤",event:"无关联事件",qualities:["忠诚无畏","责任担当","坚守秘密"],interpretation:"1926年加入中国共产党，广西早期地下党干部。1932年在南宁开展地下工作时被捕，面对敌人严刑拷打与威逼利诱，宁死不屈，最终以生命捍卫党的秘密，展现了忠诚无畏的革命气节。",inspire:"面对利益诱惑与原则考验（如学术诚信问题），学习罗文坤宁死不屈的气节，守住内心底线。",is_key:false},
+{type:"红色人物",city:"百色市",site:"隆志勇",event:"关联事件：南疆边防斗争",qualities:["坚毅自律","不畏艰险","责任担当"],interpretation:"1979年入伍，南疆边防侦察大队一连连长。1984年至1989年常年深入越南北部热带雨林执行侦察任务，先后执行任务120余次，击毙击伤越军多名，多次化险为夷，荣立三等功。",inspire:"面对枯燥的专业实训或长期科研攻坚，学习隆志勇坚毅自律的作风，在长期高压中锤炼过硬本领。",is_key:false},
+{type:"红色人物",city:"崇左市",site:"潘武文",event:"无关联事件",qualities:["持之以恒","甘于奉献","坚守初心"],interpretation:"凭祥市夏石乡浦扣屯人，三代传承的护边员。自1979年起常年徒步巡逻中越边境险峻山道，每天往返10余公里，以持之以恒的坚守守护国界，展现了甘于奉献的家国情怀。",inspire:"面对平凡枯燥的社团工作或志愿服务，学习潘武文三代护边的定力，把小事做长久，在默默奉献中实现价值。",is_key:false},
+{type:"红色人物",city:"桂林市",site:"陈树湘",event:"关联事件：湘江战役",qualities:["忠诚担当","视死如归","信念如磐"],interpretation:"1934年11月湘江战役中，红三十四师师长陈树湘率部掩护中央纵队突围。激战中身负重伤被俘，为不被敌人侮辱、不泄露部队信息，毅然从伤口扯出肠子绞断自尽，壮烈牺牲，年仅29岁。",inspire:"面对人生无法挽回的绝境时，汲取陈树湘断肠明志的气节，宁折不弯，以最后尊严捍卫内心信念。",is_key:true},
+{type:"红色人物",city:"百色市",site:"黄治峰",event:"关联事件：百色起义",qualities:["开拓创新","甘于奉献","勇敢抗争"],interpretation:"1924年开始组织农民运动，1927年创建奉议县农民协会。1929年参与百色起义，任红七军第四纵队队长。深入底层发动农民反抗地主压迫，为右江革命根据地创建奠定群众基础，1932年被国民党杀害。",inspire:"面对需要深入基层的社会实践工作，学习黄治峰扎根底层的担当，不浮于表面，在与群众接触中找到真正着力点。",is_key:false},
+{type:"红色人物",city:"桂林市",site:"廖梦樵",event:"关联事件：桂东建党工作",qualities:["执着坚守","沉着谨慎","勇敢无畏"],interpretation:"1925年加入中国共产党，广西早期党员。1926年至1927年在桂东平乐、梧州一带积极发展地下党组织，建立农民协会和工会，播撒革命火种，为党组织在广西的扩展作出奠基性贡献，1927年被捕牺牲。",inspire:"面对创业项目等开创性工作缺乏先例时，学习廖梦樵开拓奠基的勇气，敢于做先行者。",is_key:true},
+{type:"红色人物",city:"钦州市",site:"阮明",event:"关联事件：钦廉四属武装起义",qualities:["信念坚定","果敢无畏","心系群众"],interpretation:"1937年加入中国共产党，钦廉地区革命重要领导者。1945年2月领导灵山抗日武装起义，攻克灵山县城，开辟钦廉游击区域，为桂南抗日与解放斗争作出重要贡献，1946年被国民党杀害。",inspire:"面对需要带动群体开展新项目（如社团活动），学习阮明率先起义的担当，敢于成为先行者。",is_key:false},
+{type:"红色人物",city:"钦州市",site:"招玉馨",event:"关联事件：钦廉四属武装起义",qualities:["勇敢顽强","临危不乱","忠诚守信"],interpretation:"1939年加入中国共产党，灵山革命骨干。1945年参与灵山抗日武装起义，长期在敌后开展宣传发动与游击工作，1947年被国民党逮捕，面对审讯临危不乱，以忠诚守信守护革命事业，英勇就义。",inspire:"面对实验失败、项目延期等高压下的日常工作，学习招玉馨临危不乱的定力，沉稳可靠。",is_key:false},
+{type:"红色人物",city:"贵港市",site:"谭留科",event:"关联事件：桂中南游击战争",qualities:["坚韧不拔","因地制宜","甘于吃苦"],interpretation:"1936年加入中国共产党，桂中南游击队主要领导人。1947年至1949年长期依托桂中山区开展敌后游击作战，因地制宜灵活作战，发动群众建立农会，为广西解放作出重要贡献，1949年8月英勇牺牲。",inspire:"面对西部计划等长期艰苦的工作环境，学习谭留科因地制宜的智慧，善用现有条件。",is_key:false},
+{type:"红色人物",city:"南宁市",site:"黄立香",event:"关联事件：横县抗日斗争",qualities:["自强不息","机智应变","团结群众"],interpretation:"1938年加入中国共产党，横县游击队负责人。1944年组织横县抗日自卫队，深入发动群众组建敌后抗日武装，以机智应变多次粉碎日军扫荡，1945年10月被日军包围激战中英勇牺牲。",inspire:"面对求职面试等复杂多变的挑战，学习黄立香机智应变的智慧，善于发动身边力量。",is_key:false},
+{type:"红色人物",city:"贺州市",site:"梁一柱",event:"关联事件：怀集武装起义",qualities:["不畏强权","敢于反抗","持之以恒"],interpretation:"1940年加入中国共产党，怀集革命骨干。1944年8月发动农民武装反抗国民党反动势力压迫，组织怀集起义，虽起义受挫仍坚守信念，1948年在战斗中英勇牺牲。",inspire:"面对职场不公等强权压迫，学习梁一柱敢于反抗的勇气，不向不合理低头。",is_key:false},
+{type:"红色人物",city:"玉林市",site:"巫德椿",event:"关联事件：陆川抗日游击斗争",qualities:["沉着冷静","机动灵活","守望相助"],interpretation:"1938年加入中国共产党，陆川抗日游击队领导人。1944年至1945年依托陆川山区地形开展敌后抗日活动，以沉着冷静与机动灵活多次化险为夷，1945年抗战胜利后继续革命，1949年病逝。",inspire:"面对实习中的突发状况等复杂危险处境，学习巫德椿沉着冷静的作风，机敏灵活。",is_key:false},
+{type:"红色人物",city:"防城港市",site:"黄泽善",event:"关联事件：上思武装游击斗争",qualities:["坚韧隐忍","适应逆境","持之以恒"],interpretation:"1940年加入中国共产党，上思武装游击斗争领导人。1945年至1949年依托十万大山深山密林坚持游击作战，历经艰难始终不放弃，坚持至广西解放，1950年病故。",inspire:"面对考研二战、科研无成果等长期看不到希望的坚持，学习黄泽善深山苦战的韧性。",is_key:false},
+{type:"红色人物",city:"桂林市",site:"黄绍辉",event:"关联事件：荔浦敌后游击战",qualities:["机智应变","信念坚定","甘于吃苦"],interpretation:"1938年加入中国共产党，荔浦敌后游击战领导人。1944年至1945年组织群众开展敌后破坏与袭扰，以机智应变牵制日军兵力，配合主力作战，1945年8月抗战胜利后继续革命，1950年牺牲。",inspire:"面对毕业论文等庞杂任务的细节攻坚，学习黄绍辉机智应变的智慧，找准薄弱环节发力。",is_key:true},
+{type:"红色人物",city:"玉林市",site:"傅奕群",event:"关联事件：博白武装起义",qualities:["果敢无畏","敢于担当","众志成城"],interpretation:"1940年加入中国共产党，博白武装起义组织者。1945年2月发动群众武装起义，攻克博白县城，开辟桂东南游击根据地，以果敢无畏的担当打开革命新局面，1945年4月英勇牺牲。",inspire:"面对创新创业等需要开拓新领域的挑战，学习傅奕群率先起义的果敢，敢于打破常规。",is_key:false},
+{type:"红色人物",city:"河池市",site:"韦士霖",event:"关联事件：宜州敌后游击",qualities:["吃苦耐劳","乐观顽强","依靠群众"],interpretation:"1939年加入中国共产党，宜州地下游击斗争骨干。1944年至1949年长期在宜州山区坚持游击作战，依靠群众支持保存革命力量，展现了吃苦耐劳的品质，1949年解放后病逝。",inspire:"面对三支一扶等长期艰苦的工作，学习韦士霖吃苦耐劳的作风，依托身边力量稳扎稳打。",is_key:false},
+{type:"红色人物",city:"南宁市",site:"蒙善宇",event:"关联事件：宾阳地下革命活动",qualities:["耐心坚持","沉着谨慎","信念不移"],interpretation:"1926年加入中国共产党，宾阳地下革命活动骨干。1927年白色恐怖后长期秘密发展党员、建立地下组织，以耐心谨慎积蓄革命力量，为解放接应做好准备，1947年病逝。",inspire:"面对社团建设等成效缓慢的长期工作，学习蒙善宇耐心坚持的智慧，不急于求成。",is_key:false},
+{type:"红色人物",city:"崇左市",site:"何子礽",event:"关联事件：宁明边境革命活动",qualities:["坚守边疆","机智果敢","民族团结"],interpretation:"1939年加入中国共产党，宁明边境革命活动骨干。1940年至1949年长期串联中越边境各族群众传播革命思想，建立秘密联络点，推动边疆民族团结与觉醒，1950年病故。",inspire:"面对留学生活等跨文化沟通挑战，学习何子礽串联边境的智慧，尊重差异、耐心沟通。",is_key:false},
+{type:"红色人物",city:"崇左市",site:"农有资",event:"关联事件：天等游击斗争",qualities:["逆境坚守","乐观顽强","因地制宜"],interpretation:"1947年至1949年，农有资领导天等游击队依托广西大石山区险要地形，因地制宜开展长期游击作战，历经国民党军多次围剿仍坚持战斗，直至配合南下大军解放广西，1985年病逝。",inspire:"面对宿舍条件差等环境与资源局限，学习农有资因地制宜的智慧，善用身边现有条件。",is_key:false},
+{type:"红色人物",city:"南宁市",site:"李曦晨",event:"关联事件：马山农民抗争运动",qualities:["敢于斗争","坚韧不拔","互助共生"],interpretation:"1926年加入中国共产党，马山农民抗争运动领导人。1930年代发动马山壮族等少数民族群众，反抗地主豪绅压迫与国民党苛捐杂税，建立农民武装和农民协会，推动桂中革命发展，1934年被国民党杀害。",inspire:"面对班级不公等群体性困境，学习李曦晨组织抗争的智慧，团结同伴共同发声。",is_key:false},
+{type:"红色人物",city:"崇左市",site:"苏松甲",event:"关联事件：龙州起义",qualities:["勇敢无畏","甘于奉献","信念坚定"],interpretation:"1930年参加龙州起义，任红八军战士。起义后积极参与左江根据地建设，建立农民协会和工会，以勇敢无畏与甘于奉献的作风投入革命斗争，1930年8月英勇牺牲。",inspire:"面对社团活动等团队配合工作，学习苏松甲甘于奉献的精神，不计个人得失。",is_key:false},
+{type:"红色人物",city:"百色市",site:"莫俊峰",event:"关联事件：右江游击斗争",qualities:["坚毅执着","百折不挠","心系群众"],interpretation:"1930年参加红七军，留守战士。1930年主力北上后留守右江山区坚持游击斗争，历经国民党军多次围剿仍百折不挠，心系群众守护革命火种，1932年被敌人杀害。",inspire:"面对考研二战独自备考的孤独处境，学习莫俊峰留守坚持的韧劲。",is_key:false},
+{type:"红色人物",city:"梧州市",site:"张兆梅",event:"关联事件：藤县地下工作",qualities:["温柔坚定","忠诚奉献","临危不惧"],interpretation:"1927年加入中国共产党，藤县地下交通员。白色恐怖下秘密传递情报，以温柔坚定与忠诚奉献守护革命事业，多次临危不惧完成任务，1932年病故。",inspire:"面对学生会后勤等默默无闻的幕后工作，学习张兆梅温柔坚定的定力，把琐碎任务做稳做实。",is_key:false},
+{type:"红色人物",city:"防城港市",site:"陈善",event:"关联事件：防城边境抗日斗争",qualities:["警惕果敢","不怕牺牲","守护国土"],interpretation:"1937年加入中国共产党，防城抗日自卫队骨干。1938年至1945年常年坚守南疆边境抵御日军侵扰，以警惕果敢与不怕牺牲的作风守护国土，1945年在战斗中英勇牺牲。",inspire:"面对边境支教等边远岗位的孤独与风险，学习陈善警惕果敢的作风。",is_key:false},
+{type:"红色人物",city:"玉林市",site:"黄美伦",event:"关联事件：桂东南地下革命",qualities:["共情群众","耐心坚韧","勇敢乐观"],interpretation:"1940年加入中国共产党，桂东南妇女革命骨干。以共情群众与耐心坚韧发动桂东南妇女支援游击队伍，在艰苦环境中保持勇敢乐观，1949年解放后病逝。",inspire:"面对社团招新等需要动员他人的任务，学习黄美伦共情群众的智慧。",is_key:false},
+{type:"红色人物",city:"河池市",site:"覃道平",event:"关联事件：右江农民运动",qualities:["自强不息","敢于抗争","团结少数民族"],interpretation:"1926年加入中国共产党，都安农民运动负责人。1927年至1931年深入广西少数民族地区发动群众反抗压迫，以自强不息与敢于抗争的作风团结各族群众，1932年被国民党杀害。",inspire:"面对支教少数民族地区等跨文化基层工作，学习覃道平团结少数民族的智慧。",is_key:false},
+{type:"红色人物",city:"百色市",site:"滕国栋",event:"关联事件：百色起义",qualities:["沉着果敢","吃苦耐劳","忠诚可靠"],interpretation:"1929年参加百色起义，任红七军基层指挥员。起义后随军转战桂黔湘三省，以沉着果敢与吃苦耐劳的作风完成多次作战任务，1932年被敌人杀害。",inspire:"面对项目实施等团队执行任务，学习滕国栋沉着果敢的作风，做事踏实可靠。",is_key:false},
+{type:"红色人物",city:"百色市",site:"黄书祥",event:"关联事件：右江革命根据地建设",qualities:["开拓进取","坚韧不拔","不畏强敌"],interpretation:"1927年加入中国共产党，右江革命根据地建设骨干。1929年创建果德革命区域，建立农民协会和游击队，以开拓进取与坚韧不拔的作风在强敌环伺中打开局面，1932年被国民党杀害。",inspire:"面对创业等需要开拓新领域的挑战，学习黄书祥开拓进取的勇气，不畏强敌。",is_key:false},
+{type:"红色人物",city:"百色市",site:"陆炳堂",event:"关联事件：红七军斗争",qualities:["信念坚定","乐观从容","甘于牺牲"],interpretation:"1930年参加红七军，任连级指挥员。在多次战斗中身先士卒，以信念坚定与乐观从容的作风感染战友，1931年在江西苏区战斗中英勇牺牲。",inspire:"面对创新创业等高压高风险任务，学习陆炳堂信念坚定的定力，以行动感染身边人。",is_key:false},
+{type:"红色人物",city:"钦州市",site:"陈洪",event:"关联事件：钦廉游击斗争",qualities:["临危不乱","机动灵活","持之以恒"],interpretation:"1938年加入中国共产党，浦北游击队领导人。1945年至1949年在钦廉地区长期开展游击斗争，以临危不乱与机动灵活多次粉碎敌军围剿，1949年解放后病逝。",inspire:"面对求职面试等复杂多变的挑战，学习陈洪临危不乱的定力，机敏灵活。",is_key:false},
+{type:"红色人物",city:"河池市",site:"韦菁",event:"关联事件：右江游击战",qualities:["执着坚定","吃苦耐劳","扎根群众"],interpretation:"1929年参加百色起义，韦拔群重要战友。1930年主力北上后长期在右江山区开展游击作战，以执着坚定与吃苦耐劳扎根群众，坚持革命斗争，1933年被敌人杀害。",inspire:"面对西部计划等长期艰苦的工作环境，学习韦菁执着坚定的定力，依托群众支持。",is_key:false},
+{type:"红色人物",city:"梧州市",site:"戴锡禄",event:"关联事件：梧州地下党工作",qualities:["沉着谨慎","机智应变","忠诚守信"],interpretation:"1925年加入中国共产党，早期广西地下党员。1927年白色恐怖下在梧州开展地下工作，以沉着谨慎与机智应变多次化险为夷，忠诚守护党组织，1927年被国民党杀害。",inspire:"面对科研等高风险不确定的工作，学习戴锡禄沉着谨慎的作风，细致周密。",is_key:false},
+{type:"红色人物",city:"玉林市",site:"胡宝善",event:"关联事件：兴业敌后斗争",qualities:["勇敢坚毅","守望相助","不屈不挠"],interpretation:"1938年加入中国共产党，兴业抗日游击骨干。1944年至1945年在敌后开展游击作战，以勇敢坚毅与守望相助的作风团结乡民，不屈不挠抗击日寇，1945年英勇牺牲。",inspire:"面对同学心理危机等身边人的危难时刻，学习胡宝善守望相助的担当。",is_key:false},
+{type:"红色人物",city:"贵港市",site:"黄彰",event:"关联事件：桂中南地下党建设",qualities:["隐忍坚持","顾全大局","信念牢固"],interpretation:"1935年加入中国共产党，桂中南党组织负责人。1937年白色恐怖下隐忍坚持开展地下工作，以顾全大局与信念牢固的作风守护革命火种，1945年被国民党杀害。",inspire:"面对党建等成效缓慢的长期工作，学习黄彰隐忍坚持的智慧，不计较一时得失。",is_key:false},
+{type:"红色人物",city:"梧州市",site:"苏蔓",event:"关联事件：广西省工委斗争",qualities:["忠诚无畏","宁死不屈","责任担当"],interpretation:"1937年加入中国共产党，中共广西省工委领导人。1942年在桂林开展地下工作时被捕，面对敌人审讯为保守组织秘密，宁死不屈，最终以生命捍卫信仰，1942年9月英勇就义。",inspire:"面对学术诚信等利益诱惑与原则考验，学习苏蔓宁死不屈的气节，守住内心底线。",is_key:false},
+{type:"红色人物",city:"梧州市",site:"张海萍",event:"关联事件：地下党工作",qualities:["勇敢乐观","信仰坚定","甘于奉献"],interpretation:"1939年加入中国共产党，地下党员。白色恐怖下坚持革命工作，以勇敢乐观与信仰坚定的作风应对险境，甘于奉献守护事业，1942年牺牲。",inspire:"面对实验室加班等高压环境的日常工作，学习张海萍勇敢乐观的心态。",is_key:false},
+{type:"红色人物",city:"贵港市",site:"吴腾芳",event:"关联事件：桂中南武装斗争",qualities:["机智果敢","不畏艰险","善于谋划"],interpretation:"1937年加入中国共产党，桂中南游击队指挥员。以机智果敢与不畏艰险的作风多次完成作战任务，善于谋划打开革命局面，1949年解放后病逝。",inspire:"面对创业项目等需要谋划的复杂任务，学习吴腾芳善于谋划的智慧，周密果敢。",is_key:false},
+{type:"红色人物",city:"南宁市",site:"林一堃",event:"关联事件：南宁地下革命",qualities:["耐心细致","沉着冷静","开拓局面"],interpretation:"1926年加入中国共产党，南宁市地下党组织骨干。以耐心细致与沉着冷静的作风长期开展地下工作，开拓局面积蓄革命力量，1930年被捕牺牲。",inspire:"面对实验数据整理等需要细致耐心的工作，学习林一堃沉着冷静的作风，周密细致。",is_key:false},
+{type:"红色人物",city:"贺州市",site:"黄奇彦",event:"关联事件：昭平敌后游击",qualities:["吃苦耐劳","逆境自强","团结乡民"],interpretation:"1939年加入中国共产党，昭平山区游击工作者。以吃苦耐劳与逆境自强的作风坚持敌后斗争，团结乡民守护家乡，1945年抗战胜利后病逝。",inspire:"面对宿舍条件差等资源匮乏的艰苦环境，学习黄奇彦逆境自强的韧劲。",is_key:false},
+{type:"红色人物",city:"崇左市",site:"莫如杰",event:"关联事件：左江边境革命",qualities:["守边护土","民族团结","勇敢坚定"],interpretation:"1938年加入中国共产党，凭祥边境革命骨干。以守边护土与民族团结的作风长期在边境开展工作，勇敢坚定守护边疆，1949年解放后病逝。",inspire:"面对边境支教等边远岗位的孤独坚守，学习莫如杰守边护土的担当。",is_key:false},
+{type:"红色人物",city:"桂林市",site:"李恒仁",event:"关联事件：湘江战役",qualities:["坚毅无畏","舍生取义","顾全大局"],interpretation:"1934年11月湘江战役中，桂林全州爱国群众李恒仁主动为红军提供向导与补给，在红军血战桂北时舍生取义支援革命，以坚毅无畏的作风帮助红军突破湘江。",inspire:"面对班级后勤等需要默默付出的支援任务，学习李恒仁舍生取义的担当，不计个人得失。",is_key:true},
+{type:"红色人物",city:"百色市",site:"赵世同",event:"关联事件：右江游击战争",qualities:["百折不挠","乐观顽强","扎根山区"],interpretation:"1930年参加红七军，右江游击战争重要领导人。1930年主力撤离后长期坚持右江敌后斗争，历经国民党军多次围剿仍百折不挠，扎根山区守护火种，1932年被敌人杀害。",inspire:"面对考研二战独自备考的孤独处境，学习赵世同留守坚持的韧劲。",is_key:false},
+{type:"红色人物",city:"钦州市",site:"黄举初",event:"关联事件：灵山抗日战斗",qualities:["勇敢顽强","信念执着","保家卫国"],interpretation:"1938年加入中国共产党，灵山抗日游击队队员。1945年在四峡坳等战斗中以勇敢顽强与信念执着的作风抗击日军，保家卫国，1945年英勇牺牲。",inspire:"面对保护同学等身边需要守护的人与事，学习黄举初保家卫国的担当。",is_key:false},
+{type:"红色人物",city:"河池市",site:"梁游",event:"关联事件：桂西北游击斗争",qualities:["因地制宜","坚韧隐忍","善于发动群众"],interpretation:"1939年加入中国共产党，桂西北游击队领导人。以因地制宜与坚韧隐忍的作风长期开展游击斗争，善于发动群众守护革命力量，1949年解放后病逝。",inspire:"面对创业资金不足等环境局限，学习梁游因地制宜的智慧，善用身边条件。",is_key:false},
+{type:"红色人物",city:"河池市",site:"覃士冕",event:"关联事件：百色起义",qualities:["勤学善思","勇敢善战","持之以恒"],interpretation:"1929年参加百色起义，任红七军战士。起义后随军转战桂黔湘三省，以勤学善思与勇敢善战的作风历经长期革命征战，坚持革命到底，1955年被授予少将军衔。",inspire:"面对考研、考公等漫长而艰难的征途，学习覃士冕勤学善思的智慧，在持续学习中锤炼本领。",is_key:false},
+{type:"红色人物",city:"玉林市",site:"叶燕",event:"关联事件：容县地下革命",qualities:["沉着冷静","机动灵活","甘于奉献"],interpretation:"1938年加入中国共产党，容县地下交通负责人。白色恐怖下秘密传递情报，以沉着冷静与机动灵活的作风多次化险为夷，甘于奉献，1945年病逝。",inspire:"面对学生会后勤等默默无闻的幕后工作，学习叶燕沉着冷静的定力，把琐碎任务做稳做实。",is_key:false},
+{type:"红色人物",city:"河池市",site:"韦国清",event:"关联事件：百色起义",qualities:["顾全大局","沉着睿智","坚毅勇敢"],interpretation:"1929年参加百色起义，任红七军战士。1930年随军转战桂黔湘三省，参加长征，以顾全大局与沉着睿智的作风终身投身革命事业，成为共和国开国上将，1989年病逝。",inspire:"面对职业发展等漫长的人生征途，学习韦国清顾全大局的智慧，不计较一时得失。",is_key:false},
+{type:"红色人物",city:"河池市",site:"覃健",event:"关联事件：红七军北上",qualities:["吃苦耐劳","信念坚定","不畏强敌"],interpretation:"1929年参加百色起义，任红七军战士。1930年跟随红七军北上远征转战千里，以吃苦耐劳与信念坚定的作风突破国民党军重重封锁奔赴中央苏区，1955年被授予中将军衔。",inspire:"面对考研、考公等漫长而艰难的求学征途，学习覃健吃苦耐劳的韧劲，咬定目标坚持向前。",is_key:false},
+{type:"红色人物",city:"防城港市",site:"唐才猷",event:"关联事件：钦防游击斗争",qualities:["机智多谋","临危不乱","坚守信仰"],interpretation:"1938年加入中国共产党，钦防武装斗争领导人。以机智多谋与临危不乱的作风长期开展武装斗争，坚守信仰直至1949年广西解放，1955年被授予少将军衔。",inspire:"面对求职面试等复杂多变的挑战，学习唐才猷机智多谋的智慧，周密灵活。",is_key:false},
+{type:"红色人物",city:"防城港市",site:"沈鸿周",event:"关联事件：防城地下斗争",qualities:["坚韧不拔","乐观自信","依靠群众"],interpretation:"1937年加入中国共产党，防城地下党组织负责人。以坚韧不拔与乐观自信的作风长期开展地下工作，依靠群众守护革命火种，1949年解放后病逝。",inspire:"面对西部计划等长期艰苦的工作环境，学习沈鸿周坚韧不拔的定力。",is_key:false},
+{type:"红色人物",city:"梧州市",site:"周锡桓",event:"关联事件：苍梧地下党",qualities:["谨慎隐忍","持之以恒","忠诚不二"],interpretation:"1927年加入中国共产党，苍梧地下党联络骨干。白色恐怖下长期开展地下联络工作，以谨慎隐忍与持之以恒的作风守护情报网络，忠诚不二，1932年病故。",inspire:"面对社团后勤等默默无闻的长期工作，学习周锡桓谨慎隐忍的定力。",is_key:false},
+{type:"红色人物",city:"崇左市",site:"甘湛泽",event:"关联事件：龙州起义",qualities:["开拓创新","勇敢坚定","团结群众"],interpretation:"1930年参加龙州起义，任红八军干部。起义后开展工农教育，建立农民协会和工会，以开拓创新与勇敢坚定的作风团结各族群众投身革命，1930年英勇牺牲。",inspire:"面对创业等需要开拓创新的工作，学习甘湛泽开拓创新的勇气，敢于打破常规。",is_key:false},
+{type:"红色人物",city:"百色市",site:"黄善藩",event:"关联事件：百色起义",qualities:["敢于斗争","临危不惧","甘于牺牲"],interpretation:"1929年参加百色起义，任红七军指挥员。起义后随军转战桂黔湘三省，以敢于斗争与临危不惧的作风多次完成作战任务，甘于牺牲，1931年在江西苏区英勇牺牲。",inspire:"面对创新创业等高压高风险任务，学习黄善藩临危不惧的定力，在危险中保持果敢。",is_key:false},
+{type:"红色人物",city:"百色市",site:"黄大权",event:"关联事件：东兰农民运动",qualities:["共情群众","持之以恒","自强不息"],interpretation:"1923年加入中国共产党，韦拔群重要战友。长期在右江开展农民运动，以共情群众与持之以恒的作风组织农民反抗地主压迫，自强不息，1932年被国民党杀害。",inspire:"面对社会实践等需要深入基层的工作，学习黄大权共情群众的智慧，真诚理解他人需求。",is_key:false},
+{type:"红色人物",city:"河池市",site:"陈鼓涛",event:"关联事件：桂西北农民运动",qualities:["沉着稳重","信念坚定","扎根基层"],interpretation:"1928年加入中国共产党，桂西北农民运动骨干。长期组织农民反抗地主压迫，以沉着稳重与信念坚定的作风扎根基层，发动群众，1932年被国民党杀害。",inspire:"面对基层就业等需要扎根基层的工作，学习陈鼓涛沉着稳重的作风，踏实可靠。",is_key:false},
+{type:"红色人物",city:"南宁市",site:"覃耀武",event:"关联事件：上林游击斗争",qualities:["吃苦耐劳","逆境不屈","守望相助"],interpretation:"1940年加入中国共产党，上林敌后游击骨干。在山区开展游击作战，以吃苦耐劳与逆境不屈的作风坚持斗争，守望相助守护乡民，1949年解放后病逝。",inspire:"面对西部计划等长期艰苦的工作环境，学习覃耀武逆境不屈的韧劲。",is_key:false},
+{type:"红色人物",city:"河池市",site:"韦梅轩",event:"关联事件：右江游击战",qualities:["乐观顽强","坚韧执着","民族团结"],interpretation:"1930年参加红七军，巴马地区革命工作者。长期在右江开展游击作战，以乐观顽强与坚韧执着的作风团结各族群众，坚持斗争，1932年被敌人杀害。",inspire:"面对考研二战等长期艰苦奋斗，学习韦梅轩乐观顽强的心态，在艰难中保持积极。",is_key:false},
+{type:"红色人物",city:"贵港市",site:"黄显群",event:"关联事件：平南抗日斗争",qualities:["勇敢无畏","敢于担当","众志成城"],interpretation:"1938年加入中国共产党，平南抗日自卫队骨干。1944年至1945年在敌后开展抗日斗争，以勇敢无畏与敢于担当的作风团结乡民，众志成城抗击日寇，1945年英勇牺牲。",inspire:"面对同学心理危机等身边人的危难时刻，学习黄显群众志成城的担当。",is_key:false},
+{type:"红色人物",city:"玉林市",site:"罗烈",event:"关联事件：北流地下革命",qualities:["机智应变","谨慎沉着","信念不移"],interpretation:"1938年加入中国共产党，北流地下党员。白色恐怖下开展地下工作，以机智应变与谨慎沉着的作风多次化险为夷，信念不移，1945年病逝。",inspire:"面对科研等高风险不确定的环境，学习罗烈机智应变的智慧，细致周密。",is_key:false},
+{type:"红色人物",city:"桂林市",site:"李捷如",event:"关联事件：桂北敌后游击",qualities:["不畏严寒","吃苦耐劳","坚守山区"],interpretation:"1938年加入中国共产党，桂北山区革命骨干。1944年至1945年长期在桂北严寒山区开展敌后游击，以不畏严寒与吃苦耐劳的作风坚守岗位，守护革命力量，1945年抗战胜利后病逝。",inspire:"面对冬季实习等环境艰苦的长期坚守，学习李捷如不畏严寒的韧劲。",is_key:true},
+{type:"红色人物",city:"崇左市",site:"农康",event:"关联事件：左江游击斗争",qualities:["民族团结","坚韧隐忍","开拓局面"],interpretation:"1938年加入中国共产党，大新县革命组织者。以民族团结与坚韧隐忍的作风长期在左江边境开展工作，开拓局面守护边疆，1949年解放后病逝。",inspire:"面对边疆支教等跨文化边远地区工作，学习农康民族团结的智慧。",is_key:false},
+{type:"红色人物",city:"来宾市",site:"黄永棋",event:"关联事件：武宣农民运动",qualities:["敢于抗争","自强不息","团结乡民"],interpretation:"1926年加入中国共产党，武宣早期革命参与者。深入发动乡民反抗地主压迫，以敢于抗争与自强不息的作风推动桂中农民运动发展，1927年被国民党杀害。",inspire:"面对班级不公等群体性困境，学习黄永棋敢于抗争的勇气，团结同伴共同发声。",is_key:false},
+{type:"红色人物",city:"来宾市",site:"韦敬礼",event:"关联事件：象州敌后游击",qualities:["沉着冷静","因地制宜","持之以恒"],interpretation:"1938年加入中国共产党，象州游击队负责人。以沉着冷静与因地制宜的作风长期开展游击斗争，持之以恒守护革命力量，1949年解放后病逝。",inspire:"面对宿舍条件差等环境与资源局限，学习韦敬礼因地制宜的智慧，善用现有条件。",is_key:false},
+{type:"红色人物",city:"南宁市",site:"张声震",event:"关联事件：桂中南游击战争",qualities:["顾全大局","勤学善思","甘于奉献"],interpretation:"1940年加入中国共产党，桂中南革命骨干。以顾全大局与勤学善思的作风参与游击战争，甘于奉献守护集体事业，1949年解放后任广西壮族自治区副主席。",inspire:"面对社团合作等团队协作任务，学习张声震顾全大局的智慧，不计较个人得失。",is_key:false},
+{type:"红色人物",city:"百色市",site:"韦树桐",event:"关联事件：右江游击斗争",qualities:["逆境坚守","乐观豁达","不畏围剿"],interpretation:"1930年参加红七军，凌云山区游击战士。1930年主力北上后在右江山区坚持游击作战，以逆境坚守与乐观豁达的作风不畏围剿，守护革命火种，1932年被敌人杀害。",inspire:"面对科研无成果等长期看不到希望的坚持，学习韦树桐逆境坚守的韧劲。",is_key:false}
+];
+
+// 自动赋值 type 和 category
+DATABASE.forEach(item=>{
+if(!item.type)item.type="红色遗址";
+if(!item.category){
+const q=item.qualities.join("");
+if(/勇敢|无畏|敢于|挺身|不怕|果敢|抗争|反抗|不畏/.test(q))item.category="勇敢抗争、无畏担当类";
+else if(/坚韧|吃苦|逆境|不屈|顽强|坚守|持久|隐忍|乐观|坚毅|自强|忠诚|沉着/.test(q))item.category="直面困境、不怕困难类";
+else item.category="支撑辅助积极品质";
+}
+});
+
+const TYPE_LIST=["红色遗址","重大历史事件","红色人物"];
+const CITY_LIST=[...new Set(DATABASE.map(d=>d.city))];
+const CATEGORIES={
+"直面困境、不怕困难类":["坚韧不拔","不畏艰险","迎难而上","吃苦耐劳","逆境坚守","愈挫愈勇","百折不挠","攻坚克难","意志顽强","乐观坚持","不惧漫长艰苦","隐忍坚强","屡败屡战"],
+"勇敢抗争、无畏担当类":["勇敢无畏","挺身而出","不惧强敌","敢于斗争","不怕牺牲","敢闯敢干","直面绝境","勇敢反抗","勇敢起义","勇敢救国","勇于抗争","勇于探索","直面压迫"],
+"支撑辅助积极品质":["理想坚定","团结互助","革命乐观","责任担当","共情友善","甘于奉献","坚定信念","坚守初心","真诚友善","包容共情","民族互助","团结协作","爱国担当"]
+};
+const ALL_QUALITY_KEYWORDS=[...new Set(DATABASE.flatMap(d=>d.qualities))];
+const CATEGORY_DESCRIPTIONS={
+"直面困境、不怕困难类":"适配医学生学业压力、考试焦虑、抗压能力培育，引导学生在面对困难时迎难而上、坚韧不拔。",
+"勇敢抗争、无畏担当类":"适配克服社交恐惧、逃避心理、缺乏勇气等问题，鼓励学生勇敢面对挑战、挺身而出。",
+"支撑辅助积极品质":"配套融合培育，通过团结互助、革命乐观、责任担当等品质，帮助学生建立积极心理支撑系统。"
+};
+
+// ============ 状态 ============
+let state={type:"全部类型",city:"全部城市",keyword:"",categories:new Set(),qualities:new Set()};
+let filteredData=[],currentDetailId=-1;
+
+// ============ 渲染筛选面板 ============
+function renderFilters(){
+// 类型
+const typeGrid=document.getElementById("typeGrid");
+typeGrid.innerHTML='';
+const allTypeBtn=document.createElement("div");
+allTypeBtn.className="type-chip"+(state.type==="全部类型"?" active":"");
+allTypeBtn.textContent="📋 全部";
+allTypeBtn.onclick=()=>{state.type="全部类型";renderAll()};
+typeGrid.appendChild(allTypeBtn);
+TYPE_LIST.forEach(t=>{
+const b=document.createElement("div");
+b.className="type-chip"+(state.type===t?" active":"");
+b.textContent=t;
+b.onclick=()=>{state.type=t;renderAll()};
+typeGrid.appendChild(b);
+});
+
+// 城市
+const cityGrid=document.getElementById("cityGrid");
+cityGrid.innerHTML='';
+const allBtn=document.createElement("div");
+allBtn.className="city-chip"+(state.city==="全部城市"?" active":"");
+allBtn.textContent="🌐 全部";
+allBtn.onclick=()=>{state.city="全部城市";renderAll()};
+cityGrid.appendChild(allBtn);
+CITY_LIST.forEach(c=>{
+const b=document.createElement("div");
+b.className="city-chip"+(c=="桂林市"?"guilin ":"")+(state.city===c?" active":"");
+b.textContent=(c=="桂林市"?"★":"")+c;
+b.onclick=()=>{state.city=c;renderAll()};
+cityGrid.appendChild(b);
+});
+
+// 分类
+const catList=document.getElementById("categoryList");
+catList.innerHTML='';
+Object.keys(CATEGORIES).forEach(cat=>{
+const label=document.createElement("label");
+label.className="category-item";
+const input=document.createElement("input");
+input.type="checkbox";
+input.checked=state.categories.has(cat);
+input.onchange=()=>{state.categories.has(cat)?state.categories.delete(cat):state.categories.add(cat);updateFilterCount();doFilter()};
+const span=document.createElement("span");
+span.textContent=cat;
+label.appendChild(input);
+label.appendChild(span);
+catList.appendChild(label);
+});
+
+// 品质
+const qGrid=document.getElementById("qualityGrid");
+qGrid.innerHTML='';
+ALL_QUALITY_KEYWORDS.slice(0,36).forEach(q=>{
+const label=document.createElement("label");
+label.className="quality-item";
+const input=document.createElement("input");
+input.type="checkbox";
+input.checked=state.qualities.has(q);
+input.onchange=()=>{state.qualities.has(q)?state.qualities.delete(q):state.qualities.add(q);updateFilterCount();doFilter()};
+const span=document.createElement("span");
+span.textContent=q;
+label.appendChild(input);
+label.appendChild(span);
+qGrid.appendChild(label);
+});
+}
+
+function updateFilterCount(){
+let count=state.categories.size+state.qualities.size;
+if(state.type!=="全部类型")count++;
+if(state.city!=="全部城市")count++;
+document.getElementById("filterCount").textContent=count;
+}
+
+// ============ 筛选逻辑 ============
+function doFilter(){
+log.group('doFilter()');
+const kw=state.keyword.toLowerCase();
+log.info('doFilter','筛选条件',{type:state.type,city:state.city,keyword:kw,categories:[...state.categories],qualities:[...state.qualities]});
+
+const beforeCount=DATABASE.length;
+filteredData=DATABASE.filter(item=>{
+if(state.type!=="全部类型"&&item.type!==state.type)return false;
+if(state.city!=="全部城市"&&item.city!==state.city)return false;
+if(state.categories.size>0&&!state.categories.has(item.category))return false;
+if(state.qualities.size>0&&!item.qualities.some(q=>state.qualities.has(q)))return false;
+if(kw){
+const text=(item.type+item.city+item.site+item.event+item.qualities.join(" ")+item.interpretation).toLowerCase();
+if(!text.includes(kw))return false;
+}
+return true;
+});
+log.ok('doFilter','筛选完成',{总数:beforeCount,匹配数:filteredData.length,筛掉数:beforeCount-filteredData.length});
+
+// 检查数据完整性
+const missingInspire=filteredData.filter(d=>!d.inspire);
+if(missingInspire.length>0)log.warn('doFilter','部分条目缺少inspire字段',{count:missingInspire.length,sites:missingInspire.map(d=>d.site)});
+const missingInterp=filteredData.filter(d=>!d.interpretation);
+if(missingInterp.length>0)log.warn('doFilter','部分条目缺少interpretation字段',{count:missingInterp.length,sites:missingInterp.map(d=>d.site)});
+
+renderResults();
+log.groupEnd();
+}
+
+function renderResults(){
+log.group('renderResults()');
+const cards=document.getElementById("resultCards");
+const count=document.getElementById("resultCount");
+const tags=document.getElementById("filterTags");
+
+if(!cards||!count||!tags){
+log.error('renderResults','DOM元素缺失',{cards:!!cards,count:!!count,tags:!!tags});
+log.groupEnd();
+return;
+}
+
+count.textContent=filteredData.length;
+log.info('renderResults','结果数量已更新',{count:filteredData.length});
+
+// 筛选标签
+let tagHTML="";
+if(state.type!=="全部类型")tagHTML+=`<span class="filter-tag">类型：${state.type}</span>`;
+if(state.city!=="全部城市")tagHTML+=`<span class="filter-tag">城市：${state.city}</span>`;
+if(state.keyword)tagHTML+=`<span class="filter-tag">搜索：「${state.keyword}」</span>`;
+tags.innerHTML=tagHTML;
+log.ok('renderResults','筛选标签渲染完成',{tagCount:tagHTML?tagHTML.split('filter-tag').length-1:0});
+
+// 渲染卡片
+if(filteredData.length===0){
+log.warn('renderResults','无匹配结果，显示空状态');
+cards.innerHTML='<div class="no-results"><div class="no-results-icon">🔍</div><h3>未找到匹配的红色文化资源</h3><p>请尝试调整筛选条件或搜索关键词</p></div>';
+log.groupEnd();
+return;
+}
+
+log.info('renderResults',`开始渲染 ${filteredData.length} 张卡片`);
+cards.innerHTML='';
+let keyCount=0;
+filteredData.forEach((item,idx)=>{
+const realIdx=DATABASE.indexOf(item);
+if(realIdx===-1){
+log.error('renderResults','无法在DATABASE中找到条目索引',{idx,item:item.site});
+return;
+}
+const card=document.createElement("div");
+card.className="result-card"+(item.is_key?" key-resource":"");
+if(item.is_key)keyCount++;
+card.onclick=()=>showDetail(realIdx);
+const qualHTML=item.qualities.slice(0,4).map(q=>`<span class="quality-tag">${q}</span>`).join("");
+const more=item.qualities.length>4?`<span class="quality-tag more">+${item.qualities.length-4}</span>`:"";
+card.innerHTML=`
+<div class="card-header">
+<span class="card-city">📍 ${item.city}</span>
+<span class="card-type-tag">${item.type||'红色遗址'}</span>
+${item.is_key?'<span class="card-key-tag">★课题核心</span>':''}
+<span class="card-cat-tag">${item.category}</span>
+</div>
+<h2 class="card-title">🏛️ ${item.site}</h2>
+<p class="card-event">📌 ${item.event}</p>
+<div class="card-qualities">${qualHTML}${more}</div>
+<p class="card-desc">${item.interpretation.slice(0,80)}${item.interpretation.length>80?'...':''}</p>
+<span class="card-action">查看详情 →</span>`;
+cards.appendChild(card);
+});
+log.ok('renderResults','卡片渲染完成',{total:filteredData.length,keyResources:keyCount,normal:filteredData.length-keyCount});
+log.groupEnd();
+}
+
+// ============ 日志系统（兼容旧浏览器） ============
+var DEBUG=true;
+var log={
+  _ts:function(){return new Date().toLocaleTimeString('zh-CN',{hour12:false})+'.'+String(Date.now()%1000).padStart(3,'0')},
+  info:function(tag,msg,data){if(DEBUG)console.log('[ℹ️ '+tag+']',msg,data!=null?data:'')},
+  ok:function(tag,msg,data){if(DEBUG)console.log('[✅ '+tag+']',msg,data!=null?data:'')},
+  warn:function(tag,msg,data){if(DEBUG)console.warn('[⚠️ '+tag+']',msg,data!=null?data:'')},
+  error:function(tag,msg,data){if(DEBUG)console.error('[❌ '+tag+']',msg,data!=null?data:'')},
+  group:function(title){if(DEBUG){try{console.groupCollapsed('[📂 '+title+']')}catch(e){console.log('--- '+title+' ---')}}},
+  groupEnd:function(){if(DEBUG){try{console.groupEnd()}catch(e){}}}
+};
+
+// ============ 详情页 ============
+function showDetail(id){
+log.group(`showDetail(id=${id})`);
+log.info('showDetail','开始加载详情页',{id});
+
+const item=DATABASE[id];
+if(!item){
+log.error('showDetail','DATABASE 中未找到该条目',{id,DBLength:DATABASE.length});
+log.groupEnd();
+return;
+}
+log.ok('showDetail','条目查找成功',{
+  id:id,
+  type:item.type,
+  site:item.site,
+  city:item.city,
+  is_key:item.is_key,
+  qualCount:item.qualities.length,
+  hasInspire:!!item.inspire,
+  interpLen:item.interpretation?.length||0
+});
+currentDetailId=id;
+
+// 头部
+log.info('showDetail','开始渲染头部');
+const dh=document.getElementById("detailHeader");
+if(!dh){log.error('showDetail','DOM元素缺失: detailHeader');log.groupEnd();return;}
+dh.className="detail-header"+(item.is_key?" key-header":"");
+log.ok('showDetail','头部class设置',{className:dh.className});
+
+document.getElementById("breadcrumb").textContent=`${item.city} › ${item.event}`;
+const tags=document.getElementById("detailTags");
+tags.innerHTML=`<span class="tag-city">📍 ${item.city}</span><span class="tag-type">${item.type||'红色遗址'}</span>${item.is_key?'<span class="tag-key">★课题核心</span>':''}<span class="tag-cat">${item.category}</span>`;
+log.ok('showDetail','标签渲染完成',{tagsHTML:tags.innerHTML});
+
+document.getElementById("detailTitle").textContent=`🏛️ ${item.site}`;
+document.getElementById("detailEvent").textContent=`📌 ${item.event}`;
+
+// 三段式解读
+log.info('showDetail','开始渲染三段式解读');
+const interpEl=document.getElementById("detailInterp");
+const qualTextEl=document.getElementById("detailQualText");
+const inspireEl=document.getElementById("detailInspire");
+
+if(!interpEl||!qualTextEl||!inspireEl){
+log.error('showDetail','三段式DOM元素缺失',{interpEl:!!interpEl,qualTextEl:!!qualTextEl,inspireEl:!!inspireEl});
+}else{
+interpEl.textContent=item.interpretation;
+qualTextEl.textContent=item.qualities.join("、");
+const inspireText=item.inspire||"学习先辈精神，在学习和工作中坚守信念、直面困难，培养坚韧不拔的积极心理品质。";
+inspireEl.textContent=inspireText;
+log.ok('showDetail','三段式解读渲染完成',{
+  '史实简述':item.interpretation?.slice(0,30)+'...',
+  '品质映射':item.qualities.join("、"),
+  '现实启示':inspireText.slice(0,30)+'...'
+});
+}
+
+// 品质徽章
+log.info('showDetail','开始渲染品质徽章');
+const qc=document.getElementById("detailQualities");
+if(!qc){log.error('showDetail','DOM元素缺失: detailQualities');}
+else{
+qc.innerHTML=item.qualities.map(q=>`<span class="qual-badge">${q}</span>`).join("");
+log.ok('showDetail','品质徽章渲染完成',{count:item.qualities.length,badges:item.qualities});
+}
+
+// 价值
+const valueEl=document.getElementById("detailValue");
+const valueText=CATEGORY_DESCRIPTIONS[item.category]||"为大学生积极心理品质培育提供本土化精神滋养。";
+valueEl.textContent=valueText;
+log.ok('showDetail','课题应用价值渲染完成',{category:item.category,valueLen:valueText.length});
+
+// 同城推荐
+log.info('showDetail','开始计算同城推荐');
+const related=DATABASE.filter(d=>d.city===item.city&&d.site!==item.site);
+const rs=document.getElementById("relatedSection");
+log.info('showDetail','同城推荐数量',{city:item.city,count:related.length});
+if(related.length>0){
+rs.style.display="";
+const rl=document.getElementById("relatedList");
+rl.innerHTML=related.map(r=>`<div class="related-item" onclick="showDetail(${DATABASE.indexOf(r)})"><span class="related-site">🏛️ ${r.site}</span><span class="related-meta">${r.event} | ${r.category}</span><span class="related-arrow">→</span></div>`).join("");
+log.ok('showDetail','同城推荐渲染完成',{items:related.map(r=>r.site)});
+}else{
+rs.style.display="none";
+log.info('showDetail','无同城推荐，隐藏该区域');
+}
+
+// 分类筛选按钮
+document.getElementById("filterByCategory").textContent=`查看「${item.category}」全部资源`;
+log.ok('showDetail','分类筛选按钮设置完成');
+
+// 切换视图
+log.info('showDetail','切换视图: 列表→详情');
+document.getElementById("listView").classList.remove("active");
+document.getElementById("detailView").classList.add("active");
+window.scrollTo(0,0);
+log.ok('showDetail',`详情页加载完成: ${item.site}`);
+log.groupEnd();
+}
+
+function showList(){
+log.info('showList','返回列表视图');
+document.getElementById("detailView").classList.remove("active");
+document.getElementById("listView").classList.add("active");
+window.scrollTo(0,0);
+log.ok('showList','列表视图已激活');
+}
+
+function filterByCategory(){
+log.group('filterByCategory()');
+if(currentDetailId<0){
+log.warn('filterByCategory','currentDetailId无效，终止操作');
+log.groupEnd();
+return;
+}
+const item=DATABASE[currentDetailId];
+log.info('filterByCategory','从详情页触发分类筛选',{site:item.site,category:item.category});
+state.categories.clear();
+state.categories.add(item.category);
+log.ok('filterByCategory','已设置分类筛选',{categories:[...state.categories]});
+renderAll();
+showList();
+log.ok('filterByCategory','筛选完成并返回列表');
+log.groupEnd();
+}
+
+// ============ 搜索/筛选操作 ============
+function doSearch(){
+state.keyword=document.getElementById("searchInput").value.trim();
+log.info('doSearch','搜索触发',{keyword:state.keyword,kwLen:state.keyword.length});
+doFilter();
+}
+
+function resetFilters(){
+log.group('resetFilters()');
+log.info('resetFilters','重置前状态',{type:state.type,city:state.city,keyword:state.keyword,categories:[...state.categories],qualities:[...state.qualities]});
+state={type:"全部类型",city:"全部城市",keyword:"",categories:new Set(),qualities:new Set()};
+document.getElementById("searchInput").value="";
+log.ok('resetFilters','状态已重置');
+renderAll();
+log.ok('resetFilters','重置完成');
+log.groupEnd();
+}
+
+function toggleFilter(){
+const panel=document.getElementById("filterPanel");
+const willShow=!panel.classList.contains("show");
+panel.classList.toggle("show");
+log.info('toggleFilter',willShow?'打开筛选面板':'关闭筛选面板');
+}
+
+function renderAll(){
+log.group('renderAll()');
+log.info('renderAll','开始全量渲染',{type:state.type,city:state.city,keyword:state.keyword,categories:[...state.categories],qualities:[...state.qualities]});
+renderFilters();
+updateFilterCount();
+doFilter();
+log.ok('renderAll','全量渲染完成');
+log.groupEnd();
+}
+
+// 回车搜索
+document.getElementById("searchInput").addEventListener("keypress",e=>{
+if(e.key==="Enter"){
+log.info('搜索框','检测到回车键，触发搜索');
+doSearch();
+}
+});
+
+// 初始化
+log.group('初始化');
+log.info('初始化','开始加载应用');
+log.info('初始化','数据库统计',{
+  总条目:DATABASE.length,
+  红色遗址:DATABASE.filter(d=>!d.type||d.type==="红色遗址").length,
+  重大历史事件:DATABASE.filter(d=>d.type==="重大历史事件").length,
+  红色人物:DATABASE.filter(d=>d.type==="红色人物").length,
+  课题核心:DATABASE.filter(d=>d.is_key).length,
+  有inspire:DATABASE.filter(d=>d.inspire).length,
+  无inspire:DATABASE.filter(d=>!d.inspire).length
+});
+log.info('初始化','城市列表',{cities:CITY_LIST,count:CITY_LIST.length});
+log.info('初始化','类型列表',{types:TYPE_LIST});
+
+document.getElementById("totalCount").textContent=DATABASE.length;
+log.ok('初始化','总数已更新',{total:DATABASE.length});
+
+renderAll();
+log.ok('初始化','应用加载完成');
+log.groupEnd();
+
+// 注册Service Worker实现PWA
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./service-worker.js')
+      .then(registration => {
+        console.log('Service Worker 注册成功:', registration.scope);
+      })
+      .catch(err => {
+        console.log('Service Worker 注册失败:', err);
+      });
+  });
+}
+</script>
+
+</body>
+</html>
